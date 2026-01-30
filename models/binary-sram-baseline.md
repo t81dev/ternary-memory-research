@@ -168,4 +168,4 @@ This document exists independently of TFMBS and may be used by any architecture 
 **Status:** Normative baseline
 **Change policy:** Changes require explicit justification and must not weaken the baseline
 
-If you want, I can draft **`docs/kill-criteria.md` next**, or help you choose **one** ternary cell family worth modeling first (and several that should be explicitly excluded).
+---
