@@ -1,0 +1,258 @@
+* spicemodels/option-b-encoder.spice
+*
+* Purpose:
+*   Methodology deck to bound encoder/buffer energy + settling time for Option B
+*   using SKY130 device models.
+*
+*   This deck is NOT for publishable absolute numbers yet.
+*   It is for:
+*     - validating stimulus + measurement plumbing
+*     - bounding encoder energy vs PT-5 baseline
+*     - exercising real transistor models early
+*
+*   Monte Carlo / mismatch is DISABLED explicitly to keep the run deterministic.
+*   When you want MC, flip the *_switch params to 1 intentionally.
+*
+
+********************************
+* Global params
+********************************
+.param VDD=1.0
+.param CLOAD=50f
+.param CDRV=25f
+.param TSTOP=40n
+
+* Scaling assumptions
+* 3 input bits per slice → ~43 slices for a 128-bit word
+.param NSLICES=43
+.param NSLICES_IN_DECK=4
+
+********************************
+* SKY130 model control switches
+* (required by sky130_fd_pr corner decks)
+********************************
+.param mc_mm_switch=0
+.param mc_pr_switch=0
+.param mc_switch=0
+.param mismatch_switch=0
+.param process_switch=0
+
+********************************
+* PFET mismatch diff defaults (zero out all slope offsets)
+********************************
+.param sky130_fd_pr__pfet_01v8__ku0_diff=0
+.param sky130_fd_pr__pfet_01v8__kvsat_diff=0
+.param sky130_fd_pr__pfet_01v8__kvth0_diff=0
+.param sky130_fd_pr__pfet_01v8__lku0_diff=0
+.param sky130_fd_pr__pfet_01v8__lkvth0_diff=0
+.param sky130_fd_pr__pfet_01v8__wku0_diff=0
+.param sky130_fd_pr__pfet_01v8__wkvth0_diff=0
+.param sky130_fd_pr__pfet_01v8__wlod_diff=0
+
+********************************
+* Include SKY130 device models
+********************************
+.include "/Users/t81dev/Code/pdk/sky130A/libs.ref/sky130_fd_pr/spice/sky130_fd_pr__nfet_01v8__ss.corner.spice"
+.include "/Users/t81dev/Code/pdk/sky130A/libs.ref/sky130_fd_pr/spice/sky130_fd_pr__pfet_01v8__ss.corner.spice"
+.include "/Users/t81dev/Code/pdk/sky130A/libs.ref/sky130_fd_pr/spice/sky130_fd_pr__nfet_01v8__mismatch.corner.spice"
+.include "/Users/t81dev/Code/pdk/sky130A/libs.ref/sky130_fd_pr/spice/sky130_fd_pr__pfet_01v8__mismatch.corner.spice"
+
+********************************
+* Supplies
+********************************
+VDD vdd 0 {VDD}
+
+********************************
+* Instantaneous power monitor
+********************************
+Bpw pwr 0 V=-V(vdd)*I(VDD)
+
+********************************
+* Basic gates (explicit device sizing)
+********************************
+.subckt INV a y vdd 0 WN=1u WP=2u L=0.15u
+Xn1 y a 0 0 sky130_fd_pr__nfet_01v8
+Xp1 y a vdd vdd sky130_fd_pr__pfet_01v8
+.ends
+
+* 2-input NAND
+.subckt NAND2 a b y vdd 0 WN=1u WP=2u L=0.15u
+Xn1 y a n1  0   sky130_fd_pr__nfet_01v8
+Xn2 n1 b 0  0   sky130_fd_pr__nfet_01v8
+Xp3 y a vdd vdd sky130_fd_pr__pfet_01v8
+Xp4 y b vdd vdd sky130_fd_pr__pfet_01v8
+.ends
+
+* 2-input NOR
+.subckt NOR2 a b y vdd 0 WN=1u WP=2u L=0.15u
+Xn1 y a 0 0 sky130_fd_pr__nfet_01v8
+Xn2 y b 0 0 sky130_fd_pr__nfet_01v8
+Xp3 y a n2 vdd sky130_fd_pr__pfet_01v8
+Xp4 n2 b vdd vdd sky130_fd_pr__pfet_01v8
+.ends
+
+* XNOR (placeholder, not optimized)
+.subckt XNOR2 a b y vdd 0
+Xn1 a b t1 vdd 0 NOR2
+Xn2 a b t2 vdd 0 NAND2
+Xinv1 t2 t2b vdd 0 INV
+Xnand t1 t2b t3 vdd 0 NAND2
+Xinv2 t3 y vdd 0 INV
+.ends
+
+********************************
+* Encoder slice (3-bit → ternary token)
+********************************
+* Two-wire ternary encoding:
+*   +1 → (tP=1, tN=0)
+*    0 → (tP=0, tN=0)
+*   -1 → (tP=0, tN=1)
+*
+* Logic here is activity-shaped placeholder.
+********************************
+.subckt ENC3 b0 b1 b2 tP tN vdd 0
+
+* Input buffers
+Xb0 b0 b0b vdd 0 INV
+Xb1 b1 b1b vdd 0 INV
+Xb2 b2 b2b vdd 0 INV
+
+* Feature extraction
+Xxnor01 b0 b1 xnor01 vdd 0 XNOR2
+Xinv01  xnor01 xor01 vdd 0 INV
+
+Xxnor20 b2 b0 xnor20 vdd 0 XNOR2
+Xinv20  xnor20 xor20 vdd 0 INV
+
+* Positive-ish
+Xinvb2  b2 nb2 vdd 0 INV
+Xnandp xor01 nb2 np vdd 0 NAND2 WN=2u WP=4u
+Xinvp  np pos vdd 0 INV WN=2u WP=4u
+
+* Negative-ish
+Xinvb1  b1 nb1 vdd 0 INV
+Xnandn xor20 nb1 nn vdd 0 NAND2
+Xinvn  nn neg vdd 0 INV
+
+* tP = pos & ~neg
+Xinvneg neg nneg vdd 0 INV
+Xnandtp pos nneg ntp vdd 0 NAND2 WN=2u WP=4u
+Xinvtp  ntp tP vdd 0 INV
+
+* tN = neg & ~pos
+Xinvpos pos npos vdd 0 INV
+Xnandtn neg npos ntn vdd 0 NAND2
+Xinvtn  ntn tN vdd 0 INV
+
+.ends
+
+********************************
+* Sense comparator + driver helpers (lean)
+********************************
+.param SENSE_WN=1u
+.param SENSE_WP=2u
+.param DRIVER_WN=2u
+.param DRIVER_WP=4u
+.subckt SENSE_LEAN tP tN senseP senseN vdd 0
+Xinv_tN tN n_tN vdd 0 INV
+Xinv_tP tP n_tP vdd 0 INV
+Xnand_pos tP n_tN pos_int vdd 0 NAND2 WN={SENSE_WN} WP={SENSE_WP}
+Xnand_neg tN n_tP neg_int vdd 0 NAND2 WN={SENSE_WN} WP={SENSE_WP}
+Xinv_pos pos_int senseP vdd 0 INV
+Xinv_neg neg_int senseN vdd 0 INV
+.ends
+
+.subckt DRIVER_LEAN inp out vdd 0
+Xdrv out inp vdd 0 INV WN={DRIVER_WN} WP={DRIVER_WP}
+.ends
+
+********************************
+* Instantiate slices (4 shown)
+********************************
+Xenc0 b0 b1 b2 tP0 tN0 vdd 0 ENC3
+Ctp0 tP0 0 {CLOAD}
+Ctn0 tN0 0 {CLOAD}
+
+Xenc1 b0 b1 b2 tP1 tN1 vdd 0 ENC3
+Ctp1 tP1 0 {CLOAD}
+Ctn1 tN1 0 {CLOAD}
+
+Xenc2 b0 b1 b2 tP2 tN2 vdd 0 ENC3
+Ctp2 tP2 0 {CLOAD}
+Ctn2 tN2 0 {CLOAD}
+
+Xenc3 b0 b1 b2 tP3 tN3 vdd 0 ENC3
+Ctp3 tP3 0 {CLOAD}
+Ctn3 tN3 0 {CLOAD}
+
+********************************
+* Sense + driver per slice (lean comparator + driver)
+********************************
+Xsense0 tP0 tN0 senseP0 senseN0 vdd 0 SENSE_LEAN
+Xsense1 tP1 tN1 senseP1 senseN1 vdd 0 SENSE_LEAN
+Xsense2 tP2 tN2 senseP2 senseN2 vdd 0 SENSE_LEAN
+Xsense3 tP3 tN3 senseP3 senseN3 vdd 0 SENSE_LEAN
+
+XdrvP0 senseP0 driveP0 vdd 0 DRIVER_LEAN
+XdrvN0 senseN0 driveN0 vdd 0 DRIVER_LEAN
+CdrvP0 driveP0 0 {CDRV}
+CdrvN0 driveN0 0 {CDRV}
+
+XdrvP1 senseP1 driveP1 vdd 0 DRIVER_LEAN
+XdrvN1 senseN1 driveN1 vdd 0 DRIVER_LEAN
+CdrvP1 driveP1 0 {CDRV}
+CdrvN1 driveN1 0 {CDRV}
+
+XdrvP2 senseP2 driveP2 vdd 0 DRIVER_LEAN
+XdrvN2 senseN2 driveN2 vdd 0 DRIVER_LEAN
+CdrvP2 driveP2 0 {CDRV}
+CdrvN2 driveN2 0 {CDRV}
+
+XdrvP3 senseP3 driveP3 vdd 0 DRIVER_LEAN
+XdrvN3 senseN3 driveN3 vdd 0 DRIVER_LEAN
+CdrvP3 driveP3 0 {CDRV}
+CdrvN3 driveN3 0 {CDRV}
+
+********************************
+********************************
+* Stimulus (dual-bit medium-activity pattern)
+********************************
+Vb0 b0 0 PULSE(0 {VDD} 1n 50p 50p 10n 20n)
+Vb1 b1 0 PULSE(0 {VDD} 2n 50p 50p 11n 22n)
+Vb2 b2 0 0
+
+********************************
+* Measurements
+********************************
+.param T1=5n
+.param T2=35n
+
+.param TLEAK1=30n
+.param TLEAK2=35n
+.param LEAK_SCALE=(T2-T1)/(TLEAK2-TLEAK1)
+
+.meas tran Pavg      AVG  V(pwr) FROM={T1} TO={T2}
+.meas tran Etotal    INTEG V(pwr) FROM={T1} TO={T2}
+
+* Tail leakage metrics
+.meas tran Pleak     AVG  V(pwr) FROM={TLEAK1} TO={TLEAK2}
+.meas tran Eleak_tail INTEG V(pwr) FROM={TLEAK1} TO={TLEAK2}
+.meas tran Eleak_est  PARAM='Eleak_tail*LEAK_SCALE'
+.meas tran Edyn       PARAM='Etotal-Eleak_est'
+.meas tran Eslice    PARAM='Edyn/NSLICES_IN_DECK'
+.meas tran Eword_est PARAM='Eslice*NSLICES'
+
+.meas tran td_tP0 TRIG V(b0) VAL={0.5*VDD} RISE=1 TARG V(tP0) VAL={0.5*VDD} RISE=1
+.meas tran td_tN0 TRIG V(b0) VAL={0.5*VDD} RISE=1 TARG V(tN0) VAL={0.5*VDD} RISE=1
+.meas tran settle_tP0 TRIG V(tP0) VAL={0.1*VDD} RISE=1 TARG V(tP0) VAL={0.9*VDD} RISE=1
+.meas tran settle_tN0 TRIG V(tN0) VAL={0.9*VDD} FALL=1 TARG V(tN0) VAL={0.1*VDD} FALL=1
+.meas tran td_driveP0 TRIG V(b0) VAL={0.5*VDD} RISE=1 TARG V(driveP0) VAL={0.5*VDD} RISE=1
+.meas tran settle_driveP0 TRIG V(driveP0) VAL={0.1*VDD} RISE=1 TARG V(driveP0) VAL={0.9*VDD} RISE=1
+
+********************************
+* Analysis control
+********************************
+.options reltol=1e-4 abstol=1e-12 vntol=1e-6
+.tran 5p {TSTOP}
+
+.end

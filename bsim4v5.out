@@ -1,0 +1,7 @@
+
+Checking parameters for BSIM 4.5 model xdrvp.xdrv.xp1:sky130_fd_pr__pfet_01v8__model.26
+Fatal: Toxe = -2.52142e-05 is not positive.
+Fatal: Toxp = -2.52142e-05 is not positive.
+Warning: Toxe = -2.52142e-05 is less than 1A. Recommended Toxe >= 5A
+Warning: Toxp = -2.52142e-05 is less than 1A. Recommended Toxp >= 5A
+Warning: Nfactor = -58352.8 is negative.

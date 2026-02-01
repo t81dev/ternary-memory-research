@@ -10,10 +10,10 @@
 - Decide whether ternary-isolated or ternary-over-binary interfaces produce measurable gains.
 - Document tools and data sources needed for future SPICE/explorations.
 
-## Phase 3 – Experimentation (conditional)
-- Move surviving models into `spicemodels/` and concrete experiments.
-- Track results under `experiments/` to show when the repository’s own failure criteria are met.
-- Publish updated conclusions in `README.md` and the docs folder once a verdict emerges.
+-## Phase 3 – Experimentation (conditional)
+- Move surviving models into `spicemodels/` and concrete experiments (shared sense, periphery, encoder energy vs activity).  
+- Track results under `experiments/` plus the periphery ledger so kill criteria and intermediary failures remain auditable.  
+- Publish updated conclusions in `README.md`, `SUMMARY.md`, and the docs folder once a verdict emerges.
 
 ternary-memory-research/
 ├── README.md
@@ -37,6 +37,6 @@ ternary-memory-research/
 
 ## Next steps
 
-1. Establish and review baselines, assumptions, and cost models before introducing physical simulation.
-2. Advance only candidates that survive explicit kill criteria into SPICE or experimental modeling.
-3. Preserve negative results and terminate ideas early when they fail to beat the defined baseline.
+1. Keep the periphery ledger (`models/periphery-cost-model.md` + `experiments/shared-sense-periphery.md`) current with each sweep so the “periphery dominance” story stays traceable.
+2. Ship new TT/mismatch sweeps only after the corner parameters align or after confirming that reuse of SS decks with `process_switch=1` is acceptable.
+3. Summarize each phase’s outcome in `SUMMARY.md` and cross-link to the `STATUS.md` backlog so every reader can see what’s blocked, what’s passing, and what still needs validation before crossing off the kill criteria.
