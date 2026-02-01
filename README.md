@@ -46,7 +46,23 @@ The following conditions falsify a candidate and are formalized in `docs/kill-cr
 
 Candidates that trigger these conditions are intentionally terminated early.
 
+## Periphery validation snapshot
+
+The shared sense + encoder path is the make-or-break periphery block for Option B. Our workload log in `spicemodels/option-b-encoder-results.md` now reports leakage‑corrected `Edyn` scaled per slice/word plus the fitted activity model `Eword ≈ Eleak + 0.33 pJ × transitions`, which feeds into the amortized periphery ledger at `models/periphery-cost-model.md`.
+
+The aggregated sense/driver run (`spicemodels/option-b-encoder-with-shared-sense*.spice`) now covers TT and ±10% VDD, and `periphery-cost-model.md` tracks the same energy/headroom tuples (≈0.45 pJ `Edyn`, 4–6 pJ `Eword_est`, headroom ≈43–111 mV). Because the shared driver never reaches 0.5 VDD, the `.meas` thresholds were shifted to `{sense_thresh_low*VDD}`→`{sense_thresh_high*VDD}` to capture retiming/jitter margins before the waveform collapses; the new `sense_headroom_min/max` logs document the resulting low-swing safety window.
+
+These measurements keep the repository’s `periphery dominance (2)` kill-criterion audit trail honest while tying the amortized encoder + shared-sense energy back into the README/ROADMAP narrative (see `models/periphery-cost-model.md` and `experiments/shared-sense-periphery.md` for the full table).
+
+## Remaining validation hookup
+After wiring the BSIM/TT parameter list into every shared-sense NFET/PFET (via the 13-parameter block or `process_switch=1`), queue 50–200 Monte Carlo runs at nominal and ±10% VDD, including a small injected noise source (≈5–10 mV) across `sharedsensep/sharedsensen`. Record the resulting `sense_headroom_min/max` histograms, confirm the worst-case headroom stays ≥20 mV even with noise, and copy the energy/headroom tuples into `models/periphery-cost-model.md` and `STATUS.md` so the kill-criterion ledger stays auditable.
+Use the `sense_thresh_low`/`sense_thresh_high` knobs to capture “time to 90%” settling so the latency/jitter story stays aligned with the energy story; add these latency entries (and any clock-skew or phase-noise stimulus) to both the README and roadmap so retiming margins remain visible.
+
+## Encoder periphery tie-in
+The “typical workload” (≈3–5 transitions per 128-bit word) now ties directly into the amortized energy model from `spicemodels/option-b-encoder-results.md`: `Eword ≈ Eleak + 0.33 pJ × transitions`. Combining that with the shared-sense guardrail (≈4–6 pJ at typical activity) keeps the total periphery budget near 5–7 pJ/word, which we continue to highlight in `models/periphery-cost-model.md` and `STATUS.md` until the unified encoder+sense deck migrates into `spicemodels/` for the final validation chain.
+
+If the ~70–110 mV window already satisfies downstream detection (e.g., a low-power comparator or inverter sense latch), call it out as a low-swing feature in README/ROADMAP. Otherwise, incrementally upsize the final driver, log that energy vs. swing trade-off in `models/periphery-cost-model.md`, and link the new data back to this validation plan before migrating the deck into `spicemodels/`.
+
 ## Repository structure
 
 This repository follows a question-first organization. Directories are intentionally empty until justified by surviving models or measurements.
-

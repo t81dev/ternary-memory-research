@@ -2,7 +2,9 @@
 
 ## Current health
 - **Encoder deck:** deterministic runs cover sync/de-sync/sparse/dense/random patterns; leakage-corrected `Edyn` and per-transition normalization reported in `spicemodels/option-b-encoder-results.md`.
-- **Shared periphery:** shared comparator/driver energy and headroom logged at ±10% VDD (0.9 V and 1.1 V) plus the random stimulus (see `experiments/shared-sense-periphery.md`). Headroom monitors (`sharedSenseDiff`) now record min/max even though the comparator never crosses 0.5·VDD.
+- **Shared periphery:** shared comparator/driver energy and headroom logged at ±10% VDD (0.9 V and 1.1 V) plus the random stimulus (see `experiments/shared-sense-periphery.md`). Headroom monitors (`sharedSenseDiff`) now record min/max even though the comparator never crosses 0.5·VDD; the TT deck now runs cleanly with the new parameter block so we have TT/±10% energy, headroom, and noise-margin data. Note the shared driver still doesn’t reach 0.5·VDD, so `td_*`/`settle_*` probes designed for 0.5·VDD continue to fail and are ignored in favor of the `sense_headroom_*` recorded values.
+  - **Noise stress plan:** add a controlled 5–10 mV noise source across `sharedsensep/sharedsensen`, log the `sense_headroom_min/max` histogram, and, if required, size up the final driver while capturing the additional energy headroom point; these entries will prove the ~70–110 mV swing survives stress or quantify the extra cost needed to widen it.
+  - **Encoder activity tie-in:** combine the typical 3–5 transitions/window workload with the amortized model `Eword ≈ Eleak + 0.33 pJ × transitions`, keeping the total encoder + shared-sense periphery estimate (~5–7 pJ/word) front-and-center in the ledger until the unified deck migrates to `spicemodels/`.
 - **Periphery ledger:** `models/periphery-cost-model.md` tracks energy vs. kill criterion, now citing the ±10% shared-sense runs.
 
 ## Work in progress

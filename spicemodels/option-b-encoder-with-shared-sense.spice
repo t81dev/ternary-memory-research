@@ -37,6 +37,9 @@
 .param mismatch_switch=0
 .param process_switch=0
 
+.param sense_thresh_low=0.02
+.param sense_thresh_high=0.08
+
 ********************************
 * PFET mismatch diff defaults (zero out all slope offsets)
 ********************************
@@ -229,11 +232,11 @@ Vb2 b2 0 0
 .meas tran Eslice    PARAM='Edyn/NSLICES_IN_DECK'
 .meas tran Eword_est PARAM='Eslice*NSLICES'
 
-.meas tran td_tP0 TRIG V(b0) VAL={0.5*VDD} RISE=1 TARG V(tP0) VAL={0.5*VDD} RISE=1
-.meas tran td_tN0 TRIG V(b0) VAL={0.5*VDD} RISE=1 TARG V(tN0) VAL={0.5*VDD} RISE=1
+.meas tran td_tP0 TRIG V(b0) VAL={sense_thresh_low*VDD} RISE=1 TARG V(tP0) VAL={sense_thresh_high*VDD} RISE=1
+.meas tran td_tN0 TRIG V(b0) VAL={sense_thresh_low*VDD} RISE=1 TARG V(tN0) VAL={sense_thresh_high*VDD} RISE=1
 .meas tran settle_tP0 TRIG V(tP0) VAL={0.1*VDD} RISE=1 TARG V(tP0) VAL={0.9*VDD} RISE=1
 .meas tran settle_tN0 TRIG V(tN0) VAL={0.9*VDD} FALL=1 TARG V(tN0) VAL={0.1*VDD} FALL=1
-.meas tran td_sharedP TRIG V(b0) VAL={0.5*VDD} RISE=1 TARG V(sharedDriveP) VAL={0.5*VDD} RISE=1
+.meas tran td_sharedP TRIG V(b0) VAL={sense_thresh_low*VDD} RISE=1 TARG V(sharedDriveP) VAL={sense_thresh_high*VDD} RISE=1
 .meas tran settle_sharedP TRIG V(sharedDriveP) VAL={0.1*VDD} RISE=1 TARG V(sharedDriveP) VAL={0.9*VDD} RISE=1
 Bshared_diff sharedSenseDiff 0 V=V(sharedsensep,sharedsensen)
 .meas tran sense_headroom_min MIN V(sharedSenseDiff)
