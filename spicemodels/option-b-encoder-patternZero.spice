@@ -166,14 +166,11 @@ Ctn3 tN3 0 {CLOAD}
 
 ********************************
 ********************************
-* Stimulus (desynchronized)
+* Stimulus (0 transitions, leakage check)
 ********************************
-.param PH0=0n
-.param PH1=1n
-.param PH2=2.1n
-Vb0 b0 0 PULSE(0 {VDD} {PH0+1n} 50p 50p 4n 8n)
-Vb1 b1 0 PULSE(0 {VDD} {PH1+2n} 50p 50p 5n 10n)
-Vb2 b2 0 PULSE(0 {VDD} {PH2+3n} 50p 50p 7n 14n)
+Vb0 b0 0 0
+Vb1 b1 0 0
+Vb2 b2 0 0
 
 ********************************
 * Measurements

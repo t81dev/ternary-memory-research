@@ -166,14 +166,11 @@ Ctn3 tN3 0 {CLOAD}
 
 ********************************
 ********************************
-* Stimulus (desynchronized)
+* Stimulus (random-ish per-slice toggles using PWL)
 ********************************
-.param PH0=0n
-.param PH1=1n
-.param PH2=2.1n
-Vb0 b0 0 PULSE(0 {VDD} {PH0+1n} 50p 50p 4n 8n)
-Vb1 b1 0 PULSE(0 {VDD} {PH1+2n} 50p 50p 5n 10n)
-Vb2 b2 0 PULSE(0 {VDD} {PH2+3n} 50p 50p 7n 14n)
+Vb0 b0 0 PWL(0 0 0.5n 1 1.4n 0 2.9n 1 7n 1 7.1n 0 14n 0 35n 0)
+Vb1 b1 0 PWL(0 0 0.8n 1 1.9n 0 3.6n 1 7.2n 1 7.3n 0 13n 0 35n 0)
+Vb2 b2 0 PWL(0 0 1.9n 1 2.6n 0 4.3n 1 8n 1 8.1n 0 15n 0 35n 0)
 
 ********************************
 * Measurements

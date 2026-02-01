@@ -125,8 +125,8 @@ Xinv20  xnor20 xor20 vdd 0 INV
 
 * Positive-ish
 Xinvb2  b2 nb2 vdd 0 INV
-Xnandp xor01 nb2 np vdd 0 NAND2 WN=2u WP=4u
-Xinvp  np pos vdd 0 INV WN=2u WP=4u
+Xnandp xor01 nb2 np vdd 0 NAND2
+Xinvp  np pos vdd 0 INV
 
 * Negative-ish
 Xinvb1  b1 nb1 vdd 0 INV
@@ -135,7 +135,7 @@ Xinvn  nn neg vdd 0 INV
 
 * tP = pos & ~neg
 Xinvneg neg nneg vdd 0 INV
-Xnandtp pos nneg ntp vdd 0 NAND2 WN=2u WP=4u
+Xnandtp pos nneg ntp vdd 0 NAND2
 Xinvtp  ntp tP vdd 0 INV
 
 * tN = neg & ~pos
@@ -166,14 +166,11 @@ Ctn3 tN3 0 {CLOAD}
 
 ********************************
 ********************************
-* Stimulus (desynchronized)
+* Stimulus (2 transitions/window)
 ********************************
-.param PH0=0n
-.param PH1=1n
-.param PH2=2.1n
-Vb0 b0 0 PULSE(0 {VDD} {PH0+1n} 50p 50p 4n 8n)
-Vb1 b1 0 PULSE(0 {VDD} {PH1+2n} 50p 50p 5n 10n)
-Vb2 b2 0 PULSE(0 {VDD} {PH2+3n} 50p 50p 7n 14n)
+Vb0 b0 0 PULSE(0 {VDD} 1n 50p 50p 20n 40n)
+Vb1 b1 0 0
+Vb2 b2 0 0
 
 ********************************
 * Measurements

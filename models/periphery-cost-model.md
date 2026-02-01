@@ -95,9 +95,10 @@ For any candidate that survives initial kill criteria:
 
 ### Hybrid binary interface (Option B) checklist
 
-- Encoder energy measured at ≈0.25 pJ/word; total periphery ≈6.18 pJ/word vs. 6.6 target.
-- ±10% supply sweeps confirm WL/BL drivers maintain ternary mid-state (no trigger of criterion 1).
-- Encode/decode retiming study pending; log added flip-flops once complete.
+- Encoder energy measured directly in `spicemodels/option-b-encoder-results.md` (≈0.25 pJ/word for synchronous slices, ≈0.33 pJ/word when carefully de-synchronized, with leakage-corrected Edyn and per-transition normalization). The expanded measurement table now also tracks sparse / dual-bit / dense foam patterns, providing the activity-normalized `Eword_est` vs. `transitions/window` used by downstream prediction models.
+- Total periphery ≈6.18 pJ/word vs. the 6.6 pJ binary baseline (sense + drivers ≈6.0 pJ/word, encoder ≈0.25–0.34 pJ/word depending on activity). The generic sense+driver chain simulations referenced here are complete; log any future encoder/periphery concatenations so the ledger always references a recorded combination.
+- ±10% supply sweeps confirm WL/BL drivers maintain the intermediate ternary node voltages (no new criterion 1 triggers yet).
+- Encode/decode retiming study pending; document any added flip-flops or latch retiming that shifts the latency budget.
 - Final step before `spicemodels/`: confirm controller jitter margin and record completion date.
 - Replace pending items with ✓ and timestamp upon completion to document survival of both energy and kill criteria.
 
