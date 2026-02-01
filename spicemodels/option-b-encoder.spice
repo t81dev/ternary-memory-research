@@ -177,10 +177,23 @@ Vb2 b2 0 PULSE(0 {VDD} 3n 50p 50p 7n 14n)
 .param T1=5n
 .param T2=35n
 
-.meas tran Pavg AVG V(pwr) FROM={T1} TO={T2}
-.meas tran Etotal INTEG V(pwr) FROM={T1} TO={T2}
+.param TLEAK1=30n
+.param TLEAK2=35n
+.param LEAK_SCALE=(T2-T1)/(TLEAK2-TLEAK1)
+
+.meas tran Pavg      AVG  V(pwr) FROM={T1} TO={T2}
+.meas tran Etotal    INTEG V(pwr) FROM={T1} TO={T2}
+
+* Tail leakage metrics
+.meas tran Pleak     AVG  V(pwr) FROM={TLEAK1} TO={TLEAK2}
+.meas tran Eleak_tail INTEG V(pwr) FROM={TLEAK1} TO={TLEAK2}
+.meas tran Eleak_est  PARAM='Eleak_tail*LEAK_SCALE'
+.meas tran Edyn       PARAM='Etotal-Eleak_est'
+.meas tran Eslice    PARAM='Edyn/NSLICES_IN_DECK'
+.meas tran Eword_est PARAM='Eslice*NSLICES'
 
 .meas tran td_tP0 TRIG V(b0) VAL={0.5*VDD} RISE=1 TARG V(tP0) VAL={0.5*VDD} RISE=1
+.meas tran td_tN0 TRIG V(b0) VAL={0.5*VDD} RISE=1 TARG V(tN0) VAL={0.5*VDD} RISE=1
 
 ********************************
 * Analysis control
