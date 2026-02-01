@@ -2,27 +2,59 @@
 *
 * Purpose:
 *   Methodology deck to bound encoder/buffer energy + settling time for Option B
-*   WITHOUT a foundry PDK yet. Uses generic MOS models so you can validate:
-*     - stimulus sequencing
-*     - measurement plumbing (energy, delay)
-*     - scaling from “per slice” to “per 128-bit word”
+*   using SKY130 device models.
 *
-* IMPORTANT:
-*   Numbers from this deck are NOT publishable as absolute results.
-*   They are for relative sensitivity + workflow validation. When a PDK exists,
-*   swap the .model cards and (optionally) device sizing.
+*   This deck is NOT for publishable absolute numbers yet.
+*   It is for:
+*     - validating stimulus + measurement plumbing
+*     - bounding encoder energy vs PT-5 baseline
+*     - exercising real transistor models early
+*
+*   Monte Carlo / mismatch is DISABLED explicitly to keep the run deterministic.
+*   When you want MC, flip the *_switch params to 1 intentionally.
+*
 
 ********************************
-* Global params / sweeps
+* Global params
 ********************************
 .param VDD=1.0
 .param CLOAD=50f
 .param TSTOP=40n
 
-* Example: 3-bit window encoder replicated to match your word scaling.
-* A "slice" consumes 3 input bits. For a 128-bit word, if you use one slice per 3 bits:
-* NSLICES = ceil(128/3) = 43 (approx). Set explicitly to your real mapping.
+* Scaling assumptions
+* 3 input bits per slice → ~43 slices for a 128-bit word
 .param NSLICES=43
+.param NSLICES_IN_DECK=4
+
+********************************
+* SKY130 model control switches
+* (required by sky130_fd_pr corner decks)
+********************************
+.param mc_mm_switch=0
+.param mc_pr_switch=0
+.param mc_switch=0
+.param mismatch_switch=0
+.param process_switch=0
+
+********************************
+* PFET mismatch diff defaults (zero out all slope offsets)
+********************************
+.param sky130_fd_pr__pfet_01v8__ku0_diff=0
+.param sky130_fd_pr__pfet_01v8__kvsat_diff=0
+.param sky130_fd_pr__pfet_01v8__kvth0_diff=0
+.param sky130_fd_pr__pfet_01v8__lku0_diff=0
+.param sky130_fd_pr__pfet_01v8__lkvth0_diff=0
+.param sky130_fd_pr__pfet_01v8__wku0_diff=0
+.param sky130_fd_pr__pfet_01v8__wkvth0_diff=0
+.param sky130_fd_pr__pfet_01v8__wlod_diff=0
+
+********************************
+* Include SKY130 device models
+********************************
+.include "/Users/t81dev/Code/pdk/sky130A/libs.ref/sky130_fd_pr/spice/sky130_fd_pr__nfet_01v8__ss.corner.spice"
+.include "/Users/t81dev/Code/pdk/sky130A/libs.ref/sky130_fd_pr/spice/sky130_fd_pr__pfet_01v8__ss.corner.spice"
+.include "/Users/t81dev/Code/pdk/sky130A/libs.ref/sky130_fd_pr/spice/sky130_fd_pr__nfet_01v8__mismatch.corner.spice"
+.include "/Users/t81dev/Code/pdk/sky130A/libs.ref/sky130_fd_pr/spice/sky130_fd_pr__pfet_01v8__mismatch.corner.spice"
 
 ********************************
 * Supplies
@@ -30,126 +62,92 @@
 VDD vdd 0 {VDD}
 
 ********************************
-* Generic MOS models (placeholder)
-* Replace with PDK includes later:
-*   .include "65nm_tt.lib"
-*   .lib "65nm.lib" TT
+* Instantaneous power monitor
 ********************************
-.model NMOS nmos level=1 VTO=0.45 KP=220u GAMMA=0.4 LAMBDA=0.06 PHI=0.7
-.model PMOS pmos level=1 VTO=-0.45 KP=110u GAMMA=0.4 LAMBDA=0.06 PHI=0.7
+Bpw pwr 0 V=-V(vdd)*I(VDD)
 
 ********************************
-* Basic gates
+* Basic gates (explicit device sizing)
 ********************************
-* Inverter
-.subckt INV a y vdd 0 WN=1u WP=2u L=0.06u
-M1 y a 0   0   NMOS W={WN} L={L}
-M2 y a vdd vdd PMOS W={WP} L={L}
+.subckt INV a y vdd 0 WN=1u WP=2u L=0.15u
+Xn1 y a 0 0 sky130_fd_pr__nfet_01v8 W={WN} L={L}
+Xp1 y a vdd vdd sky130_fd_pr__pfet_01v8 W={WP} L={L}
 .ends
 
 * 2-input NAND
-.subckt NAND2 a b y vdd 0 WN=1u WP=2u L=0.06u
-* pull-down
-M1 y a n1  0 NMOS W={WN} L={L}
-M2 n1 b 0  0 NMOS W={WN} L={L}
-* pull-up
-M3 y a vdd vdd PMOS W={WP} L={L}
-M4 y b vdd vdd PMOS W={WP} L={L}
+.subckt NAND2 a b y vdd 0 WN=1u WP=2u L=0.15u
+Xn1 y a n1  0   sky130_fd_pr__nfet_01v8 W={WN} L={L}
+Xn2 n1 b 0  0   sky130_fd_pr__nfet_01v8 W={WN} L={L}
+Xp3 y a vdd vdd sky130_fd_pr__pfet_01v8 W={WP} L={L}
+Xp4 y b vdd vdd sky130_fd_pr__pfet_01v8 W={WP} L={L}
 .ends
 
 * 2-input NOR
-.subckt NOR2 a b y vdd 0 WN=1u WP=2u L=0.06u
-* pull-down
-M1 y a 0 0 NMOS W={WN} L={L}
-M2 y b 0 0 NMOS W={WN} L={L}
-* pull-up
-M3 y a n2 vdd PMOS W={WP} L={L}
-M4 n2 b vdd vdd PMOS W={WP} L={L}
+.subckt NOR2 a b y vdd 0 WN=1u WP=2u L=0.15u
+Xn1 y a 0 0 sky130_fd_pr__nfet_01v8 W={WN} L={L}
+Xn2 y b 0 0 sky130_fd_pr__nfet_01v8 W={WN} L={L}
+Xp3 y a n2 vdd sky130_fd_pr__pfet_01v8 W={WP} L={L}
+Xp4 n2 b vdd vdd sky130_fd_pr__pfet_01v8 W={WP} L={L}
 .ends
 
-* XNOR (built from NAND/NOR + INV as a placeholder; not optimized)
+* XNOR (placeholder, not optimized)
 .subckt XNOR2 a b y vdd 0
-* y = ~(a xor b)
-* xor = (a|b) & ~(a&b) (not minimal; placeholder)
 Xn1 a b t1 vdd 0 NOR2
 Xn2 a b t2 vdd 0 NAND2
-Xinv t2 t2b vdd 0 INV
+Xinv1 t2 t2b vdd 0 INV
 Xnand t1 t2b t3 vdd 0 NAND2
 Xinv2 t3 y vdd 0 INV
 .ends
 
 ********************************
-* Encoder slice placeholder
+* Encoder slice (3-bit → ternary token)
+********************************
+* Two-wire ternary encoding:
+*   +1 → (tP=1, tN=0)
+*    0 → (tP=0, tN=0)
+*   -1 → (tP=0, tN=1)
 *
-* You do NOT have your LUT yet. This block is a stand-in to:
-*   - toggle activity in a "realistic-ish" way
-*   - measure energy + delay under VDD/CLOAD sweeps
-*
-* Representation choice:
-*   Two-wire ternary token (recommended):
-*     encode {-1,0,+1} into (tP,tN) as:
-*       +1 => (1,0),  0 => (0,0),  -1 => (0,1)
-*   This avoids true 3-level analog rails.
-*
-* Placeholder logic here:
-*   - Compute popcount-ish signal and a sign-ish signal from (b0,b1,b2)
-*   - Map to (tP,tN) with simple gates
-*
-* Replace this subckt later with your real LUT-pruned structure.
+* Logic here is activity-shaped placeholder.
 ********************************
 .subckt ENC3 b0 b1 b2 tP tN vdd 0
-* buffer inputs (realistic drive)
+
+* Input buffers
 Xb0 b0 b0b vdd 0 INV
 Xb1 b1 b1b vdd 0 INV
 Xb2 b2 b2b vdd 0 INV
 
-* Simple features:
-*  s0 = b0 xor b1 (use XNOR then invert)
+* Feature extraction
 Xxnor01 b0 b1 xnor01 vdd 0 XNOR2
-Xinv_xor xnor01 xor01 vdd 0 INV
+Xinv01  xnor01 xor01 vdd 0 INV
 
-*  s1 = b2 xor b0
 Xxnor20 b2 b0 xnor20 vdd 0 XNOR2
-Xinv_xor2 xnor20 xor20 vdd 0 INV
+Xinv20  xnor20 xor20 vdd 0 INV
 
-*  "positive-ish" = xor01 & ~b2  (placeholder)
-Xinvb2 b2 nb2 vdd 0 INV
+* Positive-ish
+Xinvb2  b2 nb2 vdd 0 INV
 Xnandp xor01 nb2 np vdd 0 NAND2
-Xinvp np pos vdd 0 INV
+Xinvp  np pos vdd 0 INV
 
-*  "negative-ish" = xor20 & ~b1  (placeholder)
-Xinvb1 b1 nb1 vdd 0 INV
+* Negative-ish
+Xinvb1  b1 nb1 vdd 0 INV
 Xnandn xor20 nb1 nn vdd 0 NAND2
-Xinvn nn neg vdd 0 INV
+Xinvn  nn neg vdd 0 INV
 
-* Map to two-wire ternary token:
 * tP = pos & ~neg
 Xinvneg neg nneg vdd 0 INV
 Xnandtp pos nneg ntp vdd 0 NAND2
-Xinvtp ntp tP vdd 0 INV
+Xinvtp  ntp tP vdd 0 INV
 
 * tN = neg & ~pos
 Xinvpos pos npos vdd 0 INV
 Xnandtn neg npos ntn vdd 0 NAND2
-Xinvtn ntn tN vdd 0 INV
+Xinvtn  ntn tN vdd 0 INV
+
 .ends
 
 ********************************
-* Replicate slices (for scaling)
+* Instantiate slices (4 shown)
 ********************************
-* Inputs for a single word operation will be driven; slices share same stimulus
-* in this methodology deck. Later you can randomize per slice.
-*
-* Aggregate outputs are not needed; we just need switching + load.
-*
-* Load capacitance on each slice output simulates routing/controller input.
-********************************
-* Create a “slice index” by naming instances; outputs per slice
-* b0,b1,b2 are global stimulus nodes
-* For each slice, attach Cload to both tP/tN
-*
-* NOTE: ngspice doesn’t support for-loops in plain SPICE universally; expand manually if needed.
-* Here we show 4 slices for brevity; copy/paste to NSLICES or generate with a script.
 Xenc0 b0 b1 b2 tP0 tN0 vdd 0 ENC3
 Ctp0 tP0 0 {CLOAD}
 Ctn0 tN0 0 {CLOAD}
@@ -167,12 +165,8 @@ Ctp3 tP3 0 {CLOAD}
 Ctn3 tN3 0 {CLOAD}
 
 ********************************
-* Stimulus (representative toggle pattern)
-*
-* Goal: provoke switching to measure incremental energy.
-* Later: replace with truth-table sweep or random vectors.
+* Stimulus
 ********************************
-* Fast-ish edges; adjust tr/tf to match expected driver strengths
 Vb0 b0 0 PULSE(0 {VDD} 1n 50p 50p 4n 8n)
 Vb1 b1 0 PULSE(0 {VDD} 2n 50p 50p 5n 10n)
 Vb2 b2 0 PULSE(0 {VDD} 3n 50p 50p 7n 14n)
@@ -180,36 +174,18 @@ Vb2 b2 0 PULSE(0 {VDD} 3n 50p 50p 7n 14n)
 ********************************
 * Measurements
 ********************************
-* Total energy drawn from VDD over a window:
-*   E = ∫ VDD * I(VDD) dt
-* In SPICE, current through a voltage source is I(VDD). Sign may be negative;
-* use -I(VDD) if needed.
-*
-* We measure over a steady-state activity window [T1,T2].
 .param T1=5n
 .param T2=35n
 
-* Average power and energy
-.meas tran Pavg AVG PARAM='V(vdd)*(-I(VDD))' FROM={T1} TO={T2}
-.meas tran Etotal PARAM='Pavg*({T2}-{T1})'
+.meas tran Pavg AVG V(pwr) FROM={T1} TO={T2}
+.meas tran Etotal INTEG V(pwr) FROM={T1} TO={T2}
 
-* “Per-slice” energy estimate:
-* Because this methodology deck instantiates only 4 slices, scale linearly.
-.param NSLICES_IN_DECK=4
-.meas tran Eslice PARAM='Etotal/{NSLICES_IN_DECK}'
-.meas tran Eword_est PARAM='Eslice*{NSLICES}'  ; scaled to 128b-word-equivalent
-
-* Delay/settling proxy: measure time to tP0 cross 50% VDD after b0 rising
-.meas tran td_tP0 TRIG V(b0) VAL='{0.5*VDD}' RISE=1 TARG V(tP0) VAL='{0.5*VDD}' RISE=1
+.meas tran td_tP0 TRIG V(b0) VAL={0.5*VDD} RISE=1 TARG V(tP0) VAL={0.5*VDD} RISE=1
 
 ********************************
-* Analysis
+* Analysis control
 ********************************
 .options reltol=1e-4 abstol=1e-12 vntol=1e-6
 .tran 5p {TSTOP}
-
-* Example sweeps (run one at a time if your simulator complains):
-* .step param VDD list 0.9 1.0 1.1
-* .step param CLOAD list 10f 50f 200f
 
 .end
