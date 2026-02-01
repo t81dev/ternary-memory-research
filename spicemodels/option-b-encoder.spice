@@ -1,0 +1,215 @@
+* spicemodels/option-b-encoder.spice
+*
+* Purpose:
+*   Methodology deck to bound encoder/buffer energy + settling time for Option B
+*   WITHOUT a foundry PDK yet. Uses generic MOS models so you can validate:
+*     - stimulus sequencing
+*     - measurement plumbing (energy, delay)
+*     - scaling from “per slice” to “per 128-bit word”
+*
+* IMPORTANT:
+*   Numbers from this deck are NOT publishable as absolute results.
+*   They are for relative sensitivity + workflow validation. When a PDK exists,
+*   swap the .model cards and (optionally) device sizing.
+
+********************************
+* Global params / sweeps
+********************************
+.param VDD=1.0
+.param CLOAD=50f
+.param TSTOP=40n
+
+* Example: 3-bit window encoder replicated to match your word scaling.
+* A "slice" consumes 3 input bits. For a 128-bit word, if you use one slice per 3 bits:
+* NSLICES = ceil(128/3) = 43 (approx). Set explicitly to your real mapping.
+.param NSLICES=43
+
+********************************
+* Supplies
+********************************
+VDD vdd 0 {VDD}
+
+********************************
+* Generic MOS models (placeholder)
+* Replace with PDK includes later:
+*   .include "65nm_tt.lib"
+*   .lib "65nm.lib" TT
+********************************
+.model NMOS nmos level=1 VTO=0.45 KP=220u GAMMA=0.4 LAMBDA=0.06 PHI=0.7
+.model PMOS pmos level=1 VTO=-0.45 KP=110u GAMMA=0.4 LAMBDA=0.06 PHI=0.7
+
+********************************
+* Basic gates
+********************************
+* Inverter
+.subckt INV a y vdd 0 WN=1u WP=2u L=0.06u
+M1 y a 0   0   NMOS W={WN} L={L}
+M2 y a vdd vdd PMOS W={WP} L={L}
+.ends
+
+* 2-input NAND
+.subckt NAND2 a b y vdd 0 WN=1u WP=2u L=0.06u
+* pull-down
+M1 y a n1  0 NMOS W={WN} L={L}
+M2 n1 b 0  0 NMOS W={WN} L={L}
+* pull-up
+M3 y a vdd vdd PMOS W={WP} L={L}
+M4 y b vdd vdd PMOS W={WP} L={L}
+.ends
+
+* 2-input NOR
+.subckt NOR2 a b y vdd 0 WN=1u WP=2u L=0.06u
+* pull-down
+M1 y a 0 0 NMOS W={WN} L={L}
+M2 y b 0 0 NMOS W={WN} L={L}
+* pull-up
+M3 y a n2 vdd PMOS W={WP} L={L}
+M4 n2 b vdd vdd PMOS W={WP} L={L}
+.ends
+
+* XNOR (built from NAND/NOR + INV as a placeholder; not optimized)
+.subckt XNOR2 a b y vdd 0
+* y = ~(a xor b)
+* xor = (a|b) & ~(a&b) (not minimal; placeholder)
+Xn1 a b t1 vdd 0 NOR2
+Xn2 a b t2 vdd 0 NAND2
+Xinv t2 t2b vdd 0 INV
+Xnand t1 t2b t3 vdd 0 NAND2
+Xinv2 t3 y vdd 0 INV
+.ends
+
+********************************
+* Encoder slice placeholder
+*
+* You do NOT have your LUT yet. This block is a stand-in to:
+*   - toggle activity in a "realistic-ish" way
+*   - measure energy + delay under VDD/CLOAD sweeps
+*
+* Representation choice:
+*   Two-wire ternary token (recommended):
+*     encode {-1,0,+1} into (tP,tN) as:
+*       +1 => (1,0),  0 => (0,0),  -1 => (0,1)
+*   This avoids true 3-level analog rails.
+*
+* Placeholder logic here:
+*   - Compute popcount-ish signal and a sign-ish signal from (b0,b1,b2)
+*   - Map to (tP,tN) with simple gates
+*
+* Replace this subckt later with your real LUT-pruned structure.
+********************************
+.subckt ENC3 b0 b1 b2 tP tN vdd 0
+* buffer inputs (realistic drive)
+Xb0 b0 b0b vdd 0 INV
+Xb1 b1 b1b vdd 0 INV
+Xb2 b2 b2b vdd 0 INV
+
+* Simple features:
+*  s0 = b0 xor b1 (use XNOR then invert)
+Xxnor01 b0 b1 xnor01 vdd 0 XNOR2
+Xinv_xor xnor01 xor01 vdd 0 INV
+
+*  s1 = b2 xor b0
+Xxnor20 b2 b0 xnor20 vdd 0 XNOR2
+Xinv_xor2 xnor20 xor20 vdd 0 INV
+
+*  "positive-ish" = xor01 & ~b2  (placeholder)
+Xinvb2 b2 nb2 vdd 0 INV
+Xnandp xor01 nb2 np vdd 0 NAND2
+Xinvp np pos vdd 0 INV
+
+*  "negative-ish" = xor20 & ~b1  (placeholder)
+Xinvb1 b1 nb1 vdd 0 INV
+Xnandn xor20 nb1 nn vdd 0 NAND2
+Xinvn nn neg vdd 0 INV
+
+* Map to two-wire ternary token:
+* tP = pos & ~neg
+Xinvneg neg nneg vdd 0 INV
+Xnandtp pos nneg ntp vdd 0 NAND2
+Xinvtp ntp tP vdd 0 INV
+
+* tN = neg & ~pos
+Xinvpos pos npos vdd 0 INV
+Xnandtn neg npos ntn vdd 0 NAND2
+Xinvtn ntn tN vdd 0 INV
+.ends
+
+********************************
+* Replicate slices (for scaling)
+********************************
+* Inputs for a single word operation will be driven; slices share same stimulus
+* in this methodology deck. Later you can randomize per slice.
+*
+* Aggregate outputs are not needed; we just need switching + load.
+*
+* Load capacitance on each slice output simulates routing/controller input.
+********************************
+* Create a “slice index” by naming instances; outputs per slice
+* b0,b1,b2 are global stimulus nodes
+* For each slice, attach Cload to both tP/tN
+*
+* NOTE: ngspice doesn’t support for-loops in plain SPICE universally; expand manually if needed.
+* Here we show 4 slices for brevity; copy/paste to NSLICES or generate with a script.
+Xenc0 b0 b1 b2 tP0 tN0 vdd 0 ENC3
+Ctp0 tP0 0 {CLOAD}
+Ctn0 tN0 0 {CLOAD}
+
+Xenc1 b0 b1 b2 tP1 tN1 vdd 0 ENC3
+Ctp1 tP1 0 {CLOAD}
+Ctn1 tN1 0 {CLOAD}
+
+Xenc2 b0 b1 b2 tP2 tN2 vdd 0 ENC3
+Ctp2 tP2 0 {CLOAD}
+Ctn2 tN2 0 {CLOAD}
+
+Xenc3 b0 b1 b2 tP3 tN3 vdd 0 ENC3
+Ctp3 tP3 0 {CLOAD}
+Ctn3 tN3 0 {CLOAD}
+
+********************************
+* Stimulus (representative toggle pattern)
+*
+* Goal: provoke switching to measure incremental energy.
+* Later: replace with truth-table sweep or random vectors.
+********************************
+* Fast-ish edges; adjust tr/tf to match expected driver strengths
+Vb0 b0 0 PULSE(0 {VDD} 1n 50p 50p 4n 8n)
+Vb1 b1 0 PULSE(0 {VDD} 2n 50p 50p 5n 10n)
+Vb2 b2 0 PULSE(0 {VDD} 3n 50p 50p 7n 14n)
+
+********************************
+* Measurements
+********************************
+* Total energy drawn from VDD over a window:
+*   E = ∫ VDD * I(VDD) dt
+* In SPICE, current through a voltage source is I(VDD). Sign may be negative;
+* use -I(VDD) if needed.
+*
+* We measure over a steady-state activity window [T1,T2].
+.param T1=5n
+.param T2=35n
+
+* Average power and energy
+.meas tran Pavg AVG PARAM='V(vdd)*(-I(VDD))' FROM={T1} TO={T2}
+.meas tran Etotal PARAM='Pavg*({T2}-{T1})'
+
+* “Per-slice” energy estimate:
+* Because this methodology deck instantiates only 4 slices, scale linearly.
+.param NSLICES_IN_DECK=4
+.meas tran Eslice PARAM='Etotal/{NSLICES_IN_DECK}'
+.meas tran Eword_est PARAM='Eslice*{NSLICES}'  ; scaled to 128b-word-equivalent
+
+* Delay/settling proxy: measure time to tP0 cross 50% VDD after b0 rising
+.meas tran td_tP0 TRIG V(b0) VAL='{0.5*VDD}' RISE=1 TARG V(tP0) VAL='{0.5*VDD}' RISE=1
+
+********************************
+* Analysis
+********************************
+.options reltol=1e-4 abstol=1e-12 vntol=1e-6
+.tran 5p {TSTOP}
+
+* Example sweeps (run one at a time if your simulator complains):
+* .step param VDD list 0.9 1.0 1.1
+* .step param CLOAD list 10f 50f 200f
+
+.end
