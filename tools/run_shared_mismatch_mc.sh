@@ -7,7 +7,7 @@ samples=50
 mkdir -p "$logdir"
 datafile="$logdir/mismatch_mc.csv"
 printf "# auto-generated mismatch MC data\n" > "$datafile"
-printf "vdd,seed,edyn,eword,sense_min,sense_max\n" >> "$datafile"
+printf "vdd,seed,edyn,eword,sense_min,sense_max,sense_thresh_latency\n" >> "$datafile"
 
 vdd_list=${1:-"0.9 1.0 1.1"}
 
@@ -16,8 +16,10 @@ for vdd in $vdd_list; do
     logfile="$logdir/mc_$(printf '%.1f' "$vdd")V_${seed}.log"
     printf ".option gseed=%s\n.param run_vdd=%s\n.run\n.quit\n" "$seed" "$vdd" | ngspice -b "$deck" -o "$logfile"
 
-    read edyn eword sense_min sense_max < <(tools/parse_mismatch_log.py "$logfile")
+    read edyn eword sense_min sense_max sense_thresh < <(tools/parse_mismatch_log.py "$logfile")
 
-    printf "%s,%s,%s,%s,%s,%s\n" "$vdd" "$seed" "$edyn" "$eword" "$sense_min" "$sense_max" >> "$datafile"
-  done
+    printf "%s,%s,%s,%s,%s,%s,%s\n" "$vdd" "$seed" "$edyn" "$eword" "$sense_min" "$sense_max" "$sense_thresh" >> "$datafile"
+done
+
+tools/headroom_histogram.py "$datafile" "$logdir/headroom_histogram.csv"
 done

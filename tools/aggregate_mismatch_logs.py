@@ -24,13 +24,13 @@ for path in sorted(logdir.glob("mc_*V_*.log")):
     if proc.returncode:
         print(f"Failed to parse {path.name}: {proc.stderr.strip()}", file=sys.stderr)
         sys.exit(proc.returncode)
-    edyn, eword, sense_min, sense_max = proc.stdout.strip().split()
-    rows.append((float(vdd), seed, edyn, eword, sense_min, sense_max))
+    edyn, eword, sense_min, sense_max, sense_thresh = proc.stdout.strip().split()
+    rows.append((float(vdd), seed, edyn, eword, sense_min, sense_max, sense_thresh))
 
 rows.sort()
 outfile.parent.mkdir(parents=True, exist_ok=True)
 with outfile.open("w", newline="") as f:
     writer = csv.writer(f)
-    writer.writerow(["vdd", "seed", "edyn", "eword", "sense_min", "sense_max"])
+    writer.writerow(["vdd", "seed", "edyn", "eword", "sense_min", "sense_max", "sense_thresh_latency"])
     for row in rows:
         writer.writerow(row)

@@ -7,26 +7,6 @@ Circuit: * spicemodels/option-b-encoder.spice
 Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
 
 Using SPARSE 1.3 as Direct Linear Solver
-Warning: singular matrix:  check node shareddriven
-
-Note: Starting dynamic gmin stepping
-Warning: singular matrix:  check node shareddrivep
-
-Warning: Dynamic gmin stepping failed
-Note: Starting true gmin stepping
-Warning: singular matrix:  check node shareddrivep
-
-Warning: singular matrix:  check node shareddrivep
-
-Warning: singular matrix:  check node shareddrivep
-
-Warning: singular matrix:  check node shareddrivep
-
-Warning: True gmin stepping failed
-Note: Starting source stepping
-Warning: source stepping failed
-Note: Transient op started
-Note: Transient op finished successfully
 
 Initial Transient Solution
 --------------------------
@@ -34,7 +14,7 @@ Initial Transient Solution
 Node                                   Voltage
 ----                                   -------
 vdd                                        0.9
-pwr                                8.25284e-06
+pwr                                1.42855e-05
 xenc0.b0b                                  0.9
 b0                                           0
 xenc0.b1b                                  0.9
@@ -44,181 +24,183 @@ b2                                           0
 xenc0.xxnor01.t1                           0.9
 xenc0.xxnor01.xn1.n2                       0.9
 xenc0.xxnor01.t2                           0.9
-xenc0.xxnor01.xn2.n1               3.18695e-05
-xenc0.xxnor01.t2b                   4.4542e-09
+xenc0.xxnor01.xn2.n1                0.00370083
+xenc0.xxnor01.t2b                  8.72774e-09
 xenc0.xxnor01.t3                           0.9
-xenc0.xxnor01.xnand.n1                0.532524
-xenc0.xnor01                       5.96158e-06
-xenc0.xor01                           0.900024
+xenc0.xxnor01.xnand.n1                0.574903
+xenc0.xnor01                       8.72774e-09
+xenc0.xor01                                0.9
 xenc0.xxnor20.t1                           0.9
 xenc0.xxnor20.xn1.n2                       0.9
 xenc0.xxnor20.t2                           0.9
-xenc0.xxnor20.xn2.n1               3.18696e-05
-xenc0.xxnor20.t2b                  -1.2127e-07
+xenc0.xxnor20.xn2.n1                0.00370083
+xenc0.xxnor20.t2b                  8.72774e-09
 xenc0.xxnor20.t3                           0.9
-xenc0.xxnor20.xnand.n1                0.532524
-xenc0.xnor20                      -9.25454e-07
-xenc0.xor20                           0.899997
-xenc0.nb2                             0.900029
-xenc0.np                          -3.94304e-05
-xenc0.xnandp.n1                    0.000204809
-xenc0.pos                             0.899998
-xenc0.nb1                             0.899996
-xenc0.nn                           7.88102e-06
-xenc0.xnandn.n1                    -3.7285e-05
-xenc0.neg                             0.900002
-xenc0.nneg                        -6.97962e-06
-xenc0.ntp                             0.899997
-xenc0.xnandtp.n1                      0.557253
-tp0                               -2.88964e-07
-xenc0.npos                         7.77217e-05
-xenc0.ntn                             0.900016
-xenc0.xnandtn.n1                      0.532537
-tn0                                1.39467e-08
+xenc0.xxnor20.xnand.n1                0.574901
+xenc0.xnor20                       8.72774e-09
+xenc0.xor20                                0.9
+xenc0.nb2                                  0.9
+xenc0.np                           1.10672e-08
+xenc0.xnandp.n1                     5.5336e-09
+xenc0.pos                                  0.9
+xenc0.nb1                                  0.9
+xenc0.nn                            3.4911e-08
+xenc0.xnandn.n1                    1.74555e-08
+xenc0.neg                                  0.9
+xenc0.nneg                         8.72774e-09
+xenc0.ntp                                  0.9
+xenc0.xnandtp.n1                      0.611772
+tp0                                8.72774e-09
+xenc0.npos                         8.72774e-09
+xenc0.ntn                                  0.9
+xenc0.xnandtn.n1                      0.574902
+tn0                                8.72774e-09
 xenc1.b0b                                  0.9
 xenc1.b1b                                  0.9
 xenc1.b2b                                  0.9
 xenc1.xxnor01.t1                           0.9
 xenc1.xxnor01.xn1.n2                       0.9
 xenc1.xxnor01.t2                           0.9
-xenc1.xxnor01.xn2.n1               3.18695e-05
-xenc1.xxnor01.t2b                  4.45695e-09
+xenc1.xxnor01.xn2.n1                0.00370083
+xenc1.xxnor01.t2b                  8.72774e-09
 xenc1.xxnor01.t3                           0.9
-xenc1.xxnor01.xnand.n1                0.532524
-xenc1.xnor01                       5.96162e-06
-xenc1.xor01                           0.900024
+xenc1.xxnor01.xnand.n1                0.574902
+xenc1.xnor01                       8.72774e-09
+xenc1.xor01                                0.9
 xenc1.xxnor20.t1                           0.9
 xenc1.xxnor20.xn1.n2                       0.9
 xenc1.xxnor20.t2                           0.9
-xenc1.xxnor20.xn2.n1               3.18696e-05
-xenc1.xxnor20.t2b                 -1.21267e-07
+xenc1.xxnor20.xn2.n1                0.00370083
+xenc1.xxnor20.t2b                  8.72774e-09
 xenc1.xxnor20.t3                           0.9
-xenc1.xxnor20.xnand.n1                0.532524
-xenc1.xnor20                      -9.25453e-07
-xenc1.xor20                           0.899997
-xenc1.nb2                             0.900029
-xenc1.np                          -3.94316e-05
-xenc1.xnandp.n1                     0.00020481
-xenc1.pos                             0.899998
-xenc1.nb1                             0.899996
-xenc1.nn                           7.87958e-06
-xenc1.xnandn.n1                   -3.72837e-05
-xenc1.neg                             0.900002
-xenc1.nneg                        -6.99398e-06
-xenc1.ntp                             0.899997
-xenc1.xnandtp.n1                      0.557253
-tp1                               -2.63019e-07
-xenc1.npos                         7.77134e-05
-xenc1.ntn                             0.900016
-xenc1.xnandtn.n1                      0.532537
-tn1                                4.53785e-08
+xenc1.xxnor20.xnand.n1                0.574904
+xenc1.xnor20                       8.72774e-09
+xenc1.xor20                                0.9
+xenc1.nb2                                  0.9
+xenc1.np                           1.10672e-08
+xenc1.xnandp.n1                     5.5336e-09
+xenc1.pos                                  0.9
+xenc1.nb1                                  0.9
+xenc1.nn                            3.4911e-08
+xenc1.xnandn.n1                    1.74555e-08
+xenc1.neg                                  0.9
+xenc1.nneg                         8.72774e-09
+xenc1.ntp                                  0.9
+xenc1.xnandtp.n1                      0.611773
+tp1                                8.72774e-09
+xenc1.npos                         8.72774e-09
+xenc1.ntn                                  0.9
+xenc1.xnandtn.n1                      0.574902
+tn1                                8.72774e-09
 xenc2.b0b                                  0.9
 xenc2.b1b                                  0.9
 xenc2.b2b                                  0.9
 xenc2.xxnor01.t1                           0.9
 xenc2.xxnor01.xn1.n2                       0.9
 xenc2.xxnor01.t2                           0.9
-xenc2.xxnor01.xn2.n1               3.18695e-05
-xenc2.xxnor01.t2b                  4.45587e-09
+xenc2.xxnor01.xn2.n1                0.00370083
+xenc2.xxnor01.t2b                  8.72774e-09
 xenc2.xxnor01.t3                           0.9
-xenc2.xxnor01.xnand.n1                0.532524
-xenc2.xnor01                       5.96161e-06
-xenc2.xor01                           0.900024
+xenc2.xxnor01.xnand.n1                0.574903
+xenc2.xnor01                       8.72774e-09
+xenc2.xor01                                0.9
 xenc2.xxnor20.t1                           0.9
 xenc2.xxnor20.xn1.n2                       0.9
 xenc2.xxnor20.t2                           0.9
-xenc2.xxnor20.xn2.n1               3.18696e-05
-xenc2.xxnor20.t2b                 -1.21268e-07
+xenc2.xxnor20.xn2.n1                0.00370083
+xenc2.xxnor20.t2b                  8.72774e-09
 xenc2.xxnor20.t3                           0.9
-xenc2.xxnor20.xnand.n1                0.532524
-xenc2.xnor20                      -9.25439e-07
-xenc2.xor20                           0.899997
-xenc2.nb2                             0.900029
-xenc2.np                          -3.94302e-05
-xenc2.xnandp.n1                    0.000204808
-xenc2.pos                             0.899998
-xenc2.nb1                             0.899996
-xenc2.nn                           7.88117e-06
-xenc2.xnandn.n1                   -3.72853e-05
-xenc2.neg                             0.900002
-xenc2.nneg                        -6.97805e-06
-xenc2.ntp                             0.899997
-xenc2.xnandtp.n1                      0.557253
-tp2                                -4.3498e-08
-xenc2.npos                          7.7725e-05
-xenc2.ntn                             0.900016
-xenc2.xnandtn.n1                      0.532537
-tn2                                2.68066e-07
+xenc2.xxnor20.xnand.n1                0.574905
+xenc2.xnor20                       8.72774e-09
+xenc2.xor20                                0.9
+xenc2.nb2                                  0.9
+xenc2.np                           1.10672e-08
+xenc2.xnandp.n1                     5.5336e-09
+xenc2.pos                                  0.9
+xenc2.nb1                                  0.9
+xenc2.nn                            3.4911e-08
+xenc2.xnandn.n1                    1.74555e-08
+xenc2.neg                                  0.9
+xenc2.nneg                         8.72774e-09
+xenc2.ntp                                  0.9
+xenc2.xnandtp.n1                      0.611775
+tp2                                8.72774e-09
+xenc2.npos                         8.72774e-09
+xenc2.ntn                                  0.9
+xenc2.xnandtn.n1                      0.574904
+tn2                                8.72774e-09
 xenc3.b0b                                  0.9
 xenc3.b1b                                  0.9
 xenc3.b2b                                  0.9
 xenc3.xxnor01.t1                           0.9
 xenc3.xxnor01.xn1.n2                       0.9
 xenc3.xxnor01.t2                           0.9
-xenc3.xxnor01.xn2.n1               3.18695e-05
-xenc3.xxnor01.t2b                  4.45695e-09
+xenc3.xxnor01.xn2.n1                0.00370083
+xenc3.xxnor01.t2b                  8.72774e-09
 xenc3.xxnor01.t3                           0.9
-xenc3.xxnor01.xnand.n1                0.532524
-xenc3.xnor01                       5.96161e-06
-xenc3.xor01                           0.900024
+xenc3.xxnor01.xnand.n1                0.574904
+xenc3.xnor01                       8.72774e-09
+xenc3.xor01                                0.9
 xenc3.xxnor20.t1                           0.9
 xenc3.xxnor20.xn1.n2                       0.9
 xenc3.xxnor20.t2                           0.9
-xenc3.xxnor20.xn2.n1               3.18696e-05
-xenc3.xxnor20.t2b                 -1.21267e-07
+xenc3.xxnor20.xn2.n1                0.00370083
+xenc3.xxnor20.t2b                  8.72774e-09
 xenc3.xxnor20.t3                           0.9
-xenc3.xxnor20.xnand.n1                0.532524
-xenc3.xnor20                       -9.2546e-07
-xenc3.xor20                           0.899997
-xenc3.nb2                             0.900029
-xenc3.np                          -3.94316e-05
-xenc3.xnandp.n1                     0.00020481
-xenc3.pos                             0.899998
-xenc3.nb1                             0.899996
-xenc3.nn                           7.87956e-06
-xenc3.xnandn.n1                   -3.72837e-05
-xenc3.neg                             0.900002
-xenc3.nneg                        -6.99421e-06
-xenc3.ntp                             0.899997
-xenc3.xnandtp.n1                      0.557253
-tp3                               -1.84545e-07
-xenc3.npos                         7.77127e-05
-xenc3.ntn                             0.900016
-xenc3.xnandtn.n1                      0.532536
-tn3                                1.34838e-07
-xsense_shared.xor_p01.nor_ab          0.899997
-xsense_shared.xor_p01.xnor_or.n2        0.899988
-xsense_shared.orp01               -7.10685e-05
-xsense_shared.xor_p23.nor_ab          0.900007
-xsense_shared.xor_p23.xnor_or.n2         0.89999
-xsense_shared.orp23                1.98119e-05
-xsense_shared.xor_p_all.nor_ab         0.89945
-xsense_shared.xor_p_all.xnor_or.n2        0.900091
-sharedsensep                       -0.00395032
-xsense_shared.xor_n01.nor_ab          0.899997
-xsense_shared.xor_n01.xnor_or.n2        0.899989
-xsense_shared.orn01                -7.2005e-05
-xsense_shared.xor_n23.nor_ab          0.900007
-xsense_shared.xor_n23.xnor_or.n2        0.899991
-xsense_shared.orn23                2.02085e-05
-xsense_shared.xor_n_all.nor_ab        0.899439
-xsense_shared.xor_n_all.xnor_or.n2        0.900097
-sharedsensen                       -0.00401295
-sharedsensediff                    6.26289e-05
-sharedsensep_noise                 -0.00395032
-sharedsensen_noise                 -0.00401295
-shareddrivep                         0.0893443
-shareddriven                          0.089343
-shareddrivediff                    1.27899e-06
+xenc3.xxnor20.xnand.n1                0.574903
+xenc3.xnor20                       8.72774e-09
+xenc3.xor20                                0.9
+xenc3.nb2                                  0.9
+xenc3.np                           1.10672e-08
+xenc3.xnandp.n1                     5.5336e-09
+xenc3.pos                                  0.9
+xenc3.nb1                                  0.9
+xenc3.nn                            3.4911e-08
+xenc3.xnandn.n1                    1.74555e-08
+xenc3.neg                                  0.9
+xenc3.nneg                         8.72774e-09
+xenc3.ntp                                  0.9
+xenc3.xnandtp.n1                      0.611774
+tp3                                8.72774e-09
+xenc3.npos                         8.72774e-09
+xenc3.ntn                                  0.9
+xenc3.xnandtn.n1                      0.574903
+tn3                                8.72774e-09
+xsense_shared.xor_p01.nor_ab               0.9
+xsense_shared.xor_p01.xnor_or.n2             0.9
+xsense_shared.orp01                8.72775e-09
+xsense_shared.xor_p23.nor_ab               0.9
+xsense_shared.xor_p23.xnor_or.n2             0.9
+xsense_shared.orp23                8.72775e-09
+xsense_shared.xor_p_all.nor_ab             0.9
+xsense_shared.xor_p_all.xnor_or.n2             0.9
+sharedsensep                       8.72775e-09
+xsense_shared.xor_n01.nor_ab               0.9
+xsense_shared.xor_n01.xnor_or.n2             0.9
+xsense_shared.orn01                8.72775e-09
+xsense_shared.xor_n23.nor_ab               0.9
+xsense_shared.xor_n23.xnor_or.n2             0.9
+xsense_shared.orn23                8.72775e-09
+xsense_shared.xor_n_all.nor_ab             0.9
+xsense_shared.xor_n_all.xnor_or.n2             0.9
+sharedsensen                       8.72775e-09
+sharedsensediff                    1.30339e-18
+sharedsensep_noise                 8.72775e-09
+sharedsensen_noise                 8.72775e-09
+shareddrivep                               0.9
+shareddriven                      4.60383e-124
+boostp_node                                0.9
+boostn_node                       4.60383e-124
+shareddrivediff                            0.9
 bdrivediff#branch                            0
-bnoisen#branch                     3.74104e-06
-bnoisep#branch                     3.79836e-06
+bnoisen#branch                     1.58726e-05
+bnoisep#branch                    -2.23546e-12
 bdiff#branch                                 0
 bpw#branch                                   0
-vdd#branch                        -9.16982e-06
-vb2#branch                          -2.901e-08
-vb1#branch                         4.67857e-08
-vb0#branch                         4.11471e-08
+vdd#branch                        -1.58728e-05
+vb2#branch                                   0
+vb1#branch                                   0
+vb0#branch                                   0
 
 
 No. of Data Rows : 8062
@@ -253,26 +235,26 @@ Error: measure  settle_sharedp  trig(TRIG) : out of interval
 Error: measure  sense_thresh_latency  trig(TRIG) : out of interval
  .meas tran sense_thresh_latency trig v(sharedsensediff) val=    1.800000000000000e-02     rise=1 targ v(sharedsensediff) val=    7.200000000000001e-02     rise=1 failed!
 
-pavg                =  1.991104e-05 from=  5.000000e-09 to=  3.500050e-08
-etotal              =   5.97349e-13 from=  5.00000e-09 to=  3.50000e-08
-pleak               =  9.474050e-06 from=  3.000000e-08 to=  3.500050e-08
-eleak_tail          =   4.73703e-14 from=  3.00000e-08 to=  3.50000e-08
-eleak_est           =  2.84222e-13
-edyn                =  3.13128e-13
-eslice              =  7.82819e-14
-eword_est           =  3.36612e-12
-sense_headroom_min  =  -2.948760e-04 at=  7.497500e-09
-sense_headroom_max  =  2.949067e-04 at=  2.497500e-09
-sharedsensep_max    =  9.250585e-07 at=  1.764000e-10
-sharedsensen_min    =  -4.012949e-03 at=  0.000000e+00
+pavg                =  2.475097e-05 from=  5.000000e-09 to=  3.500050e-08
+etotal              =   7.42546e-13 from=  5.00000e-09 to=  3.50000e-08
+pleak               =  1.439144e-05 from=  3.000000e-08 to=  3.500050e-08
+eleak_tail          =   7.19570e-14 from=  3.00000e-08 to=  3.50000e-08
+eleak_est           =  4.31742e-13
+edyn                =  3.10804e-13
+eslice              =  7.77010e-14
+eword_est           =  3.34115e-12
+sense_headroom_min  =  8.995254e-01 at=  6.917500e-09
+sense_headroom_max  =  9.004706e-01 at=  3.199750e-08
+sharedsensep_max    =  2.351298e-07 at=  4.917500e-09
+sharedsensen_min    =  -1.174396e-06 at=  1.191750e-08
 
 
-Total analysis time (seconds) = 5.34377
+Total analysis time (seconds) = 10.3895
 
-Total elapsed time (seconds) = 8.301 
+Total elapsed time (seconds) = 15.800 
 
 Total DRAM available = 8192.000 MB.
-DRAM currently available =   65.422 MB.
-Maximum ngspice program size =  285.594 MB.
-Current ngspice program size =  185.578 MB.
+DRAM currently available =   85.906 MB.
+Maximum ngspice program size =  280.312 MB.
+Current ngspice program size =  276.578 MB.
 

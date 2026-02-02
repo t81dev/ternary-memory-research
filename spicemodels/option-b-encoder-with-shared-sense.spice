@@ -158,6 +158,10 @@ Xinvtn  ntn tN vdd 0 INV
 .param SENSE_WP=2u
 .param DRIVER_WN=2u
 .param DRIVER_WP=4u
+.param BOOST_L=0.15u
+.param BOOST_WN=0.4u
+.param BOOST_WP=0.8u
+.param BOOST_R=100k
 .subckt OR2 a b y vdd 0
 Xnor_or a b nor_ab vdd 0 NOR2
 Xinv_or nor_ab y vdd 0 INV
@@ -208,6 +212,10 @@ XdrvP sharedSenseP_noise sharedDriveP vdd 0 DRIVER_SHARED
 XdrvN sharedSenseN_noise sharedDriveN vdd 0 DRIVER_SHARED
 CdriveP sharedDriveP 0 {CDRV}
 CdriveN sharedDriveN 0 {CDRV}
+RboostP sharedDriveP boostP_node {BOOST_R}
+RboostN sharedDriveN boostN_node {BOOST_R}
+XboostP boostP_node sharedDriveN vdd vdd sky130_fd_pr__pfet_01v8 model=sky130_fd_pr__pfet_01v8__ss l={BOOST_L} w={BOOST_WP} nf=1 ad={BOOST_WP*BOOST_L} as={BOOST_WP*BOOST_L} pd={2*(BOOST_WP+BOOST_L)} ps={2*(BOOST_WP+BOOST_L)} nrd=1 nrs=1 sa=0 sb=0 sd=0
+XboostN boostN_node sharedDriveP 0 0 sky130_fd_pr__nfet_01v8 model=sky130_fd_pr__nfet_01v8__ss l={BOOST_L} w={BOOST_WN} nf=1 ad={BOOST_WN*BOOST_L} as={BOOST_WN*BOOST_L} pd={2*(BOOST_WN+BOOST_L)} ps={2*(BOOST_WN+BOOST_L)} nrd=1 nrs=1 sa=0 sb=0 sd=0
 
 ********************************
 ********************************

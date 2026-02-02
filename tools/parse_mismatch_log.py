@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import sys
-KEYS = ['edyn','eword_est','sense_headroom_min','sense_headroom_max']
+KEYS = ['edyn','eword_est','sense_headroom_min','sense_headroom_max','sense_thresh_latency']
 vals = {k: '' for k in KEYS}
 with open(sys.argv[1]) as f:
     for line in f:
