@@ -219,6 +219,10 @@ Error: measure  td_sharedp  trig(TARG) : out of interval
 Error: measure  settle_sharedp  trig(TRIG) : out of interval
  .meas tran settle_sharedp trig v(shareddrivep) val=    1.000000000000000e-01     rise=1 targ v(shareddrivep) val=    9.000000000000000e-01     rise=1 failed!
 
+
+Error: measure  sense_thresh_latency  trig(TRIG) : out of interval
+ .meas tran sense_thresh_latency trig v(shareddrivediff) val=    8.800000000000000e-01     rise=1 targ v(shareddrivediff) val=    9.000000000000000e-01     rise=1 failed!
+
 pavg                =  6.741463e-05 from=  5.000000e-09 to=  3.500250e-08
 etotal              =   2.02208e-12 from=  5.00000e-09 to=  3.50000e-08
 pleak               =  6.834184e-05 from=  3.000000e-08 to=  3.500250e-08
@@ -233,12 +237,12 @@ sense_headroom_min  =  9.984186e-01 at=  1.851250e-08
 sense_headroom_max  =  1.001754e+00 at=  7.687500e-09
 
 
-Total analysis time (seconds) = 6.00886
+Total analysis time (seconds) = 9.57436
 
-Total elapsed time (seconds) = 8.815 
+Total elapsed time (seconds) = 14.386 
 
 Total DRAM available = 8192.000 MB.
-DRAM currently available =  129.984 MB.
-Maximum ngspice program size =  286.344 MB.
-Current ngspice program size =  152.547 MB.
+DRAM currently available =   75.297 MB.
+Maximum ngspice program size =  280.000 MB.
+Current ngspice program size =  277.750 MB.
 

@@ -231,10 +231,6 @@ Error: measure  td_sharedp  trig(TARG) : out of interval
 Error: measure  settle_sharedp  trig(TRIG) : out of interval
  .meas tran settle_sharedp trig v(shareddrivep) val=    9.000000000000001e-02     rise=1 targ v(shareddrivep) val=    8.100000000000001e-01     rise=1 failed!
 
-
-Error: measure  sense_thresh_latency  trig(TRIG) : out of interval
- .meas tran sense_thresh_latency trig v(shareddrivediff) val=    1.800000000000000e-02     rise=1 targ v(shareddrivediff) val=    7.200000000000001e-02     rise=1 failed!
-
 pavg                =  2.475097e-05 from=  5.000000e-09 to=  3.500050e-08
 etotal              =   7.42546e-13 from=  5.00000e-09 to=  3.50000e-08
 pleak               =  1.439144e-05 from=  3.000000e-08 to=  3.500050e-08
@@ -245,16 +241,25 @@ eslice              =  7.77010e-14
 eword_est           =  3.34115e-12
 sense_headroom_min  =  8.995254e-01 at=  6.917500e-09
 sense_headroom_max  =  9.004706e-01 at=  3.199750e-08
+sense_diff_min      =  -5.163512e-07 at=  1.145750e-08
+sense_diff_max      =  1.170701e-06 at=  1.192250e-08
+Netlist line no. 286:
+Undefined parameter [ttime]
+Netlist line no. 286:
+ Expression err: ttime( v(shareddrivediff) ,{sense_latency_high*vdd},1)-ttime( v(shareddrivediff) ,{sense_latency_low*vdd},1)}
+Netlist line no. 286:
+Cannot compute substitute
+sense_thresh_latency=   failed
 sharedsensep_max    =  2.351298e-07 at=  4.917500e-09
 sharedsensen_min    =  -1.174396e-06 at=  1.191750e-08
 
 
-Total analysis time (seconds) = 5.10217
+Total analysis time (seconds) = 9.00422
 
-Total elapsed time (seconds) = 7.991 
+Total elapsed time (seconds) = 14.018 
 
 Total DRAM available = 8192.000 MB.
-DRAM currently available =   71.219 MB.
-Maximum ngspice program size =  286.812 MB.
-Current ngspice program size =  286.812 MB.
+DRAM currently available =   75.828 MB.
+Maximum ngspice program size =  277.781 MB.
+Current ngspice program size =  276.203 MB.
 

@@ -233,12 +233,12 @@ sense_headroom_min  =  9.984186e-01 at=  1.851250e-08
 sense_headroom_max  =  1.001754e+00 at=  7.687500e-09
 
 
-Total analysis time (seconds) = 5.54367
+Total analysis time (seconds) = 9.80213
 
-Total elapsed time (seconds) = 8.356 
+Total elapsed time (seconds) = 14.686 
 
 Total DRAM available = 8192.000 MB.
-DRAM currently available =   76.906 MB.
-Maximum ngspice program size =  286.609 MB.
-Current ngspice program size =  286.594 MB.
+DRAM currently available =   77.375 MB.
+Maximum ngspice program size =  286.422 MB.
+Current ngspice program size =  206.828 MB.
 

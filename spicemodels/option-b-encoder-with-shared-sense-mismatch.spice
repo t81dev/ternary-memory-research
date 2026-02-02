@@ -38,8 +38,10 @@
 .param mismatch_switch=1
 .param process_switch=1
 
-.param sense_thresh_low=0.02
-.param sense_thresh_high=0.08
+.param sense_thresh_low=0.03
+.param sense_thresh_high=0.05
+.param sense_latency_low=0.998
+.param sense_latency_high=1.0
 .param noise_amp=7m
 .param noise_freq=1e8
 
@@ -279,7 +281,9 @@ Vb2 b2 0 PWL(0 0 1.9n 1 2.6n 0 4.3n 1 8n 1 8.1n 0 15n 0 35n 0)
 .meas tran settle_sharedP TRIG V(sharedDriveP) VAL={0.1*VDD} RISE=1 TARG V(sharedDriveP) VAL={0.9*VDD} RISE=1
 .meas tran sense_headroom_min MIN V(sharedDriveDiff)
 .meas tran sense_headroom_max MAX V(sharedDriveDiff)
-.meas tran sense_thresh_latency TRIG V(shareddriveDiff) VAL={sense_thresh_low*VDD} RISE=1 TARG V(shareddriveDiff) VAL={sense_thresh_high*VDD} RISE=1
+.meas tran sense_diff_min MIN V(sharedSenseDiff)
+.meas tran sense_diff_max MAX V(sharedSenseDiff)
+.meas tran sense_thresh_latency PARAM='ttime("v(sharedDriveDiff)",{sense_latency_high*VDD},1) - ttime("v(sharedDriveDiff)",{sense_latency_low*VDD},1)'
 .meas tran sharedSenseP_max MAX V(sharedSenseP)
 .meas tran sharedSenseN_min MIN V(sharedSenseN)
 

@@ -28,6 +28,14 @@
 .param NSLICES_IN_DECK=4
 
 ********************************
+* Sense threshold window (jitter guard)
+********************************
+.param sense_thresh_low=0.03
+.param sense_thresh_high=0.05
+.param sense_latency_low=0.998
+.param sense_latency_high=1.0
+
+********************************
 * SKY130 model control switches
 * (required by sky130_fd_pr corner decks)
 ********************************
@@ -247,6 +255,7 @@ Vb2 b2 0 0
 Bshared_diff sharedSenseDiff 0 V=V(sharedsensep,sharedsensen)
 .meas tran sense_headroom_min MIN V(sharedDriveDiff)
 .meas tran sense_headroom_max MAX V(sharedDriveDiff)
+.meas tran sense_thresh_latency PARAM='ttime("v(sharedDriveDiff)",{sense_latency_high*VDD},1) - ttime("v(sharedDriveDiff)",{sense_latency_low*VDD},1)'
 
 ********************************
 * Analysis control
