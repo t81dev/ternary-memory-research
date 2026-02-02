@@ -199,6 +199,7 @@ XdrvP sharedSenseP sharedDriveP vdd 0 DRIVER_SHARED
 XdrvN sharedSenseN sharedDriveN vdd 0 DRIVER_SHARED
 CdriveP sharedDriveP 0 {CDRV}
 CdriveN sharedDriveN 0 {CDRV}
+BdriveDiff sharedDriveDiff 0 V=V(sharedDriveP)-V(sharedDriveN)
 
 ********************************
 ********************************
@@ -236,8 +237,8 @@ Vb2 b2 0 0
 .meas tran td_sharedP TRIG V(b0) VAL={0.5*VDD} RISE=1 TARG V(sharedDriveP) VAL={0.5*VDD} RISE=1
 .meas tran settle_sharedP TRIG V(sharedDriveP) VAL={0.1*VDD} RISE=1 TARG V(sharedDriveP) VAL={0.9*VDD} RISE=1
 Bshared_diff sharedSenseDiff 0 V=V(sharedsensep,sharedsensen)
-.meas tran sense_headroom_min MIN V(sharedSenseDiff)
-.meas tran sense_headroom_max MAX V(sharedSenseDiff)
+.meas tran sense_headroom_min MIN V(sharedDriveDiff)
+.meas tran sense_headroom_max MAX V(sharedDriveDiff)
 
 ********************************
 * Analysis control

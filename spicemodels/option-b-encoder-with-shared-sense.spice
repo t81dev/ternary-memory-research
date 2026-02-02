@@ -39,6 +39,8 @@
 
 .param sense_thresh_low=0.02
 .param sense_thresh_high=0.08
+.param noise_amp=7m
+.param noise_freq=1e8
 
 ********************************
 * PFET mismatch diff defaults (zero out all slope offsets)
@@ -198,8 +200,12 @@ Ctn3 tN3 0 {CLOAD}
 ********************************
 Xsense_shared tP0 tP1 tP2 tP3 tN0 tN1 tN2 tN3 sharedSenseP sharedSenseN vdd 0 SENSE_SHARED
 
-XdrvP sharedSenseP sharedDriveP vdd 0 DRIVER_SHARED
-XdrvN sharedSenseN sharedDriveN vdd 0 DRIVER_SHARED
+Bdiff sharedSenseDiff 0 V=V(sharedSenseP)-V(sharedSenseN)
+BnoiseP sharedSenseP_noise 0 V={V(sharedSenseP)+noise_amp*sin(2*pi*noise_freq*time)}
+BnoiseN sharedSenseN_noise 0 V={V(sharedSenseN)-noise_amp*sin(2*pi*noise_freq*time)}
+
+XdrvP sharedSenseP_noise sharedDriveP vdd 0 DRIVER_SHARED
+XdrvN sharedSenseN_noise sharedDriveN vdd 0 DRIVER_SHARED
 CdriveP sharedDriveP 0 {CDRV}
 CdriveN sharedDriveN 0 {CDRV}
 
@@ -238,9 +244,9 @@ Vb2 b2 0 0
 .meas tran settle_tN0 TRIG V(tN0) VAL={0.9*VDD} FALL=1 TARG V(tN0) VAL={0.1*VDD} FALL=1
 .meas tran td_sharedP TRIG V(b0) VAL={sense_thresh_low*VDD} RISE=1 TARG V(sharedDriveP) VAL={sense_thresh_high*VDD} RISE=1
 .meas tran settle_sharedP TRIG V(sharedDriveP) VAL={0.1*VDD} RISE=1 TARG V(sharedDriveP) VAL={0.9*VDD} RISE=1
-Bshared_diff sharedSenseDiff 0 V=V(sharedsensep,sharedsensen)
 .meas tran sense_headroom_min MIN V(sharedSenseDiff)
 .meas tran sense_headroom_max MAX V(sharedSenseDiff)
+.meas tran sense_thresh_latency TRIG V(sharedSenseDiff) VAL={sense_thresh_low*VDD} RISE=1 TARG V(sharedSenseDiff) VAL={sense_thresh_high*VDD} RISE=1
 
 ********************************
 * Analysis control
