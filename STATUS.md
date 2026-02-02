@@ -7,12 +7,12 @@
 - **Periphery ledger:** `models/periphery-cost-model.md` tracks energy vs. kill criterion, now citing the ±10% shared-sense runs.
 
 ## Work in progress
-1. **Latency/jitter validation:** With the Monte Carlo sweep (and histogram) now clearing the 20 mV guard, log the `sense_thresh_low/high` latency window plus any jitter/noise spreads so the periphery ledger can tie the guard to concrete timing envelopes before the candidate graduates.
-2. **Controller APIs:** Confirm the ternary tokens remain substrate-neutral and the shared-sense driver keeps its jitter/latency headroom under the more aggressive noise/stress patterns before moving the deck into `spicemodels/` and tight timing budgets.
+1. **Latency/jitter validation:** With the Monte Carlo sweep (and histogram) now clearing the 20 mV guard, log the `sense_thresh_low/high` latency window plus any jitter/noise spreads (and any clock-skew/phase-noise stimuli) so the periphery ledger can tie the guard to concrete timing envelopes before the candidate graduates.
+2. **Controller APIs:** Confirm the ternary tokens remain substrate-neutral and the shared-sense driver keeps its jitter/latency headroom under the more aggressive noise/stress patterns before moving the deck into `spicemodels/`, and link those entries to the timeline of histogram files so the narrative always pairs timing gains with the guard data.
 
 ## Blockers
 - The comparator/driver still never reaches 0.5·VDD, so the `td_*`/`settle_*` `.meas` entries remain “out of interval”; until we can correlate the high headroom with the latency span triggered by `{sense_thresh_low/high}`, those latency probes stay a caution rather than a pass/fail gate.
-- Logging the `sense_thresh_latency` entries plus the new histograms (`logs/mismatch-mc/headroom_histogram.csv`, `logs/mismatch-mc-tt/headroom_histogram.csv`) remains critical so the periphery ledger explains exactly how much jitter the 0.9 V/1.1 V combos can tolerate before moving to production-level `spicemodels/`.
+- Logging the `sense_thresh_latency` entries plus the new histograms (`logs/mismatch-mc/headroom_histogram.csv`, `logs/mismatch-mc-tt/headroom_histogram.csv`) remains critical so the periphery ledger explains exactly how much jitter the 0.9 V/1.1 V combos can tolerate before moving to production-level `spicemodels/`. Include these latencies whenever the ledger references the histograms to prove the timing story keeps pace with the guard audit trail.
 
 ## Done this sprint
 - Added the 13-parameter instantiation for every `sky130_fd_pr__nfet/pfet` call, allowing `option-b-encoder-with-shared-sense-tt.spice` to run and match the 1.0 V measurement energy (`Edyn ≈ 0.45 pJ`, `Eword ≈ 4.86 pJ`).  
