@@ -188,7 +188,7 @@ shareddrivep                                 1
 shareddriven                      7.12181e-150
 boostp_node                                  1
 boostn_node                       7.12181e-150
-shareddrivediff                              1
+shareddrivediff                           0.96
 sharedsensediff                      -0.380674
 bshared_diff#branch                          0
 bdrivediff#branch                            0
@@ -219,10 +219,6 @@ Error: measure  td_sharedp  trig(TARG) : out of interval
 Error: measure  settle_sharedp  trig(TRIG) : out of interval
  .meas tran settle_sharedp trig v(shareddrivep) val=    1.000000000000000e-01     rise=1 targ v(shareddrivep) val=    9.000000000000000e-01     rise=1 failed!
 
-
-Error: measure  sense_thresh_latency  trig(TRIG) : out of interval
- .meas tran sense_thresh_latency trig v(shareddrivediff) val=    8.800000000000000e-01     rise=1 targ v(shareddrivediff) val=    9.000000000000000e-01     rise=1 failed!
-
 pavg                =  6.741463e-05 from=  5.000000e-09 to=  3.500250e-08
 etotal              =   2.02208e-12 from=  5.00000e-09 to=  3.50000e-08
 pleak               =  6.834184e-05 from=  3.000000e-08 to=  3.500250e-08
@@ -233,16 +229,19 @@ eslice              =  -6.79204e-15
 eword_est           =  -2.92058e-13
 td_tp0              =  4.399323e-09 targ=  5.424323e-09 trig=  1.025000e-09
 settle_tp0          =  3.335253e-09 targ=  7.430679e-09 trig=  4.095426e-09
-sense_headroom_min  =  9.984186e-01 at=  1.851250e-08
+sense_headroom_min  =  9.600000e-01 at=  0.000000e+00
 sense_headroom_max  =  1.001754e+00 at=  7.687500e-09
+sense_thresh_latency=  4.750000e-12 targ=  4.011500e-10 trig=  3.964000e-10
+sharedsensep_max    =  6.306330e-02 at=  1.803750e-08
+sharedsensen_min    =  3.806428e-01 at=  2.999250e-08
 
 
-Total analysis time (seconds) = 9.5497
+Total analysis time (seconds) = 9.25436
 
-Total elapsed time (seconds) = 14.311 
+Total elapsed time (seconds) = 14.036 
 
 Total DRAM available = 8192.000 MB.
-DRAM currently available =   74.828 MB.
-Maximum ngspice program size =  286.672 MB.
-Current ngspice program size =  286.672 MB.
+DRAM currently available =   75.422 MB.
+Maximum ngspice program size =  286.688 MB.
+Current ngspice program size =  286.688 MB.
 

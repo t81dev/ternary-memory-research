@@ -191,7 +191,7 @@ shareddrivep                               0.9
 shareddriven                      4.60383e-124
 boostp_node                                0.9
 boostn_node                       4.60383e-124
-shareddrivediff                            0.9
+shareddrivediff                           0.86
 bdrivediff#branch                            0
 bnoisen#branch                     1.58726e-05
 bnoisep#branch                    -2.23546e-12
@@ -239,27 +239,21 @@ eleak_est           =  4.31742e-13
 edyn                =  3.10804e-13
 eslice              =  7.77010e-14
 eword_est           =  3.34115e-12
-sense_headroom_min  =  8.995254e-01 at=  6.917500e-09
+sense_headroom_min  =  8.600000e-01 at=  0.000000e+00
 sense_headroom_max  =  9.004706e-01 at=  3.199750e-08
 sense_diff_min      =  -5.163512e-07 at=  1.145750e-08
 sense_diff_max      =  1.170701e-06 at=  1.192250e-08
-Netlist line no. 286:
-Undefined parameter [ttime]
-Netlist line no. 286:
- Expression err: ttime( v(shareddrivediff) ,{sense_latency_high*vdd},1)-ttime( v(shareddrivediff) ,{sense_latency_low*vdd},1)}
-Netlist line no. 286:
-Cannot compute substitute
-sense_thresh_latency=   failed
+sense_thresh_latency=  1.249954e-13 targ=  4.013843e-10 trig=  4.012594e-10
 sharedsensep_max    =  2.351298e-07 at=  4.917500e-09
 sharedsensen_min    =  -1.174396e-06 at=  1.191750e-08
 
 
-Total analysis time (seconds) = 8.76293
+Total analysis time (seconds) = 9.56847
 
-Total elapsed time (seconds) = 13.602 
+Total elapsed time (seconds) = 14.814 
 
 Total DRAM available = 8192.000 MB.
-DRAM currently available =   84.281 MB.
-Maximum ngspice program size =  286.453 MB.
-Current ngspice program size =  283.703 MB.
+DRAM currently available =   64.750 MB.
+Maximum ngspice program size =  277.531 MB.
+Current ngspice program size =  128.234 MB.
 

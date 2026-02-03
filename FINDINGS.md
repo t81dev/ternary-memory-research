@@ -1,18 +1,24 @@
 # Findings
 
 ## Scoreboard
-- Candidates 1–3 are still the reference failures while Option B remains the only conditional survivor (see the Status/kill table in `models/ternary-cell-candidates.md:7-105`). The documentation still flags the hybrid binary interface as surviving only once the headroom/latency ledger proves the shared-sense driver and encoder energy do not violate periphery dominance (models/ternary-cell-candidates.md:82-105).
-- CNTFET/GNRFET explorations (candidates 5–8) stay deferred for device/tooling reasons, so no additional cells have graduated from their reference status (models/ternary-cell-candidates.md:107-155).
+- Candidates 1–3 remain the reference failures while Option B is the only conditional survivor (see the Status/kill table in `models/ternary-cell-candidates.md:7-105`). The documentation keeps Option B alive only if the headroom/latency ledger proves the shared-sense driver plus encoder energy don't violate periphery dominance (models/ternary-cell-candidates.md:82-105).
+- CNTFET/GNRFET routes (candidates 5–8) are still deferred for tooling/device reasons, so no new cells have graduated from their reference status (models/ternary-cell-candidates.md:107-155).
 
 ## Measurements & tests
-- Ran `./tools/run_shared_mismatch_mc.sh` to resume the ±10% mismatch sweep and regenerate `logs/mismatch-mc/mismatch_mc.csv`; the first 18 entries at 0.9 V are populated but the new `sense_thresh_latency` column still shows `failed` because the guard never crosses the 0.898–0.900 V window (`logs/mismatch-mc/mismatch_mc.csv:1-20`). The driver headroom histogram landed in `logs/mismatch-mc/headroom_histogram.csv:1-2` with the earlier samples clustered at 895–900 mV.
-- The per-corner log `logs/mismatch-mc/mc_0.9V_1.log:235-236` still records `sense_thresh_latency  trig(TRIG) ... failed`, confirming the `ttime("v(sharedDriveDiff)",…)` probe is not finding the pair of thresholds yet; the same failure stays in each of the ngspice runs because the shared-drive differential never meets the guard.
-- A background launch of `./tools/run_tt_mismatch_mc.sh` was started to capture the TT corner but the process was killed once the Sense circuit log files began accumulating (no completed TT CSV reached disk), so the TT latency histogram still needs to be rebuilt once the guard measurement is solved.
-- Manual runs such as `ngspice -b spicemodels/option-b-encoder-with-shared-sense-mismatch.spice -o logs/mismatch-mc/mc_0.9V_1.log` were repeated to exercise the new `ttime` measurement; every single log still terminates early because the guard never triggers the threshold pair.
-
-## Libraries & dependencies
-- All shared-sense decks include the SkyWater models from `/Users/t81dev/Code/pdk/sky130A/libs.ref/sky130_fd_pr/…` (`spicemodels/option-b-encoder-with-shared-sense-mismatch.spice:63-66`), so maintenance of the mismatch switches and zeroed slope knobs is still required for every run.
+- `./tools/run_shared_mismatch_mc.sh` ran 150 seeds (50 per corner) with the retargeted `sense_thresh_latency` probe. `logs/mismatch-mc/mismatch_mc.csv` now stores (`sense_min`, `sense_max`, `sense_thresh_latency`) for every seed, and all 150 entries report ≈0.125 ps jitter while headroom bins in `logs/mismatch-mc/headroom_histogram.csv` sit at 860–865 mV (max ≈0.900 V). The `Edyn ≈ 0.313 pJ` / `Eword_est ≈ 3.34 pJ` tuples remain stable while the new latency column ties each seed to the 20 mV guard.
+- `./tools/run_tt_mismatch_mc.sh` completed 50 TT seeds. `logs/mismatch-mc-tt/mismatch_mc_tt.csv` now records ≈4.75 ps per seed, and the histogram (`logs/mismatch-mc-tt/headroom_histogram.csv`) sits in the 960–965 mV bin with maxima near 1.00175 V, so every TT tuple pairs latency, headroom, and the −0.29 pJ energy entry.
+- All shared-sense decks still pull the SkyWater models from `/Users/t81dev/Code/pdk/sky130A/libs.ref/sky130_fd_pr/…` (`spicemodels/option-b-encoder-with-shared-sense-mismatch.spice:63-66`), so the mismatch switches + zeroed slope knobs must stay synchronized for every run.
 
 ## Next steps
-1. Re-target the latency probe so it captures an actual low-to-high swing (either by forcing the sharedDriveDiff node below `sense_latency_low` before measurement, injecting a controlled settling step, or widening the `sense_latency_*` window) and rerun the ±10%/TT sweeps until the `sense_thresh_latency` column populates with numeric jitter values.
-2. Once that column and the headroom histogram are stable, append the new tuples to `models/periphery-cost-model.md`, `STATUS.md`, and `SUMMARY.md` and update `FINDINGS.md` with the actual latency numbers so energy + jitter remain bundled before the deck migrates into `spicemodels/`.
+1. Copy the ±10%/TT energy+headroom+lat tuples into `models/periphery-cost-model.md`, `STATUS.md`, and `SUMMARY.md` so the guard story keeps jitter & energy together before migrating the deck back into `spicemodels/`.
+2. Keep the timeline of histogram files (`logs/mismatch-mc/headroom_histogram.csv`, `logs/mismatch-mc-tt/headroom_histogram.csv`, plus any new noise/driver permutations) aligned with the latency column so the ledger stays auditable for periphery dominance and retiming/jitter margins.
+
+## Baseline migration
+- The validated shared-sense deck now lives in `spicemodels/option-b-encoder-with-shared-sense-baseline.spice` (deterministic, mismatch switches off) and is documented in `spicemodels/README.md`. Treat this file as the canonical baseline before branching into subsequent noise/driver stress runs.
+
+## Open tabs
+- FINDINGS.md: FINDINGS.md
+- STATUS.md: STATUS.md
+- SUMMARY.md: SUMMARY.md
+- README.md: README.md
+- ternary-cell-candidates.md: models/ternary-cell-candidates.md

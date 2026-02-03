@@ -82,6 +82,9 @@ For each SPICE model added:
 - Record any assumption violations explicitly.
 - Update `models/periphery-cost-model.md` with authoritative numbers if they change.
 
+## Baseline migration
+
+The validated hybrid shared-sense deck now lives in `option-b-encoder-with-shared-sense-baseline.spice`. This deterministic, mismatch-free configuration captures the calibrated guard/jitter metrics (sense_thresh latency ≈0.125 ps at ±10%, ≈4.75 ps at TT, 860–865 mV / 960–965 mV headroom bins) and the amortized energy numbers reported in `logs/mismatch-mc/*.csv`. Use it as the canonical artifact for future investigations before branching into noise, driver, or clock-skew permutations.
 Do not delete failed SPICE results. Negative outcomes are part of the record.
 
 ## Exit conditions

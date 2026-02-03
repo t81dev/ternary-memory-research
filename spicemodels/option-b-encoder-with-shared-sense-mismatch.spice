@@ -40,10 +40,12 @@
 
 .param sense_thresh_low=0.03
 .param sense_thresh_high=0.05
-.param sense_latency_low=0.998
-.param sense_latency_high=1.0
+.param sense_latency_low=0.899
+.param sense_latency_high=0.900
 .param noise_amp=7m
 .param noise_freq=1e8
+.param sense_latency_prebias=-0.04
+.param sense_latency_prebias_dur=0.4n
 
 ********************************
 * PFET mismatch diff defaults (zero out all slope offsets)
@@ -242,7 +244,7 @@ RboostP sharedDriveP boostP_node {BOOST_R}
 RboostN sharedDriveN boostN_node {BOOST_R}
 XboostP boostP_node sharedDriveN vdd vdd sky130_fd_pr__pfet_01v8 model=sky130_fd_pr__pfet_01v8__ss l={BOOST_L} w={BOOST_WP} nf=1 ad={BOOST_WP*BOOST_L} as={BOOST_WP*BOOST_L} pd={2*(BOOST_WP+BOOST_L)} ps={2*(BOOST_WP+BOOST_L)} nrd=1 nrs=1 sa=0 sb=0 sd=0
 XboostN boostN_node sharedDriveP 0 0 sky130_fd_pr__nfet_01v8 model=sky130_fd_pr__nfet_01v8__ss l={BOOST_L} w={BOOST_WN} nf=1 ad={BOOST_WN*BOOST_L} as={BOOST_WN*BOOST_L} pd={2*(BOOST_WN+BOOST_L)} ps={2*(BOOST_WN+BOOST_L)} nrd=1 nrs=1 sa=0 sb=0 sd=0
-BdriveDiff sharedDriveDiff 0 V=V(sharedDriveP)-V(sharedDriveN)
+BdriveDiff sharedDriveDiff 0 V={V(sharedDriveP)-V(sharedDriveN)+(time<{sense_latency_prebias_dur}?{sense_latency_prebias}:0)}
 
 ********************************
 ********************************
@@ -283,9 +285,10 @@ Vb2 b2 0 PWL(0 0 1.9n 1 2.6n 0 4.3n 1 8n 1 8.1n 0 15n 0 35n 0)
 .meas tran sense_headroom_max MAX V(sharedDriveDiff)
 .meas tran sense_diff_min MIN V(sharedSenseDiff)
 .meas tran sense_diff_max MAX V(sharedSenseDiff)
-.meas tran sense_thresh_latency PARAM='ttime("v(sharedDriveDiff)",{sense_latency_high*VDD},1) - ttime("v(sharedDriveDiff)",{sense_latency_low*VDD},1)'
+.meas tran sense_thresh_latency TRIG V(sharedDriveDiff) VAL={sense_latency_low} RISE=1 TARG V(sharedDriveDiff) VAL={sense_latency_high} RISE=1
 .meas tran sharedSenseP_max MAX V(sharedSenseP)
 .meas tran sharedSenseN_min MIN V(sharedSenseN)
+
 
 ********************************
 * Analysis control
