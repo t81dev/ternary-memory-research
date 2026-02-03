@@ -20,3 +20,10 @@ The `0.9 V` run proves the shared sense logic adds almost zero extra energy at
 * The headroom monitor now uses a B-source (`Bshared_diff`) to compute `V(sharedsensep,sharedsensen)` so the min/max are recorded even though the comparator itself never hits the trigger thresholds.  
 * Delay/settling probes (`td_tN0`, `settle_sharedP`, etc.) currently fail under every run because the shared driver seldom crosses 0.5·VDD; if desired, we can add separate `.meas` statements that target lower thresholds (e.g., 0.1/0.9 VDD) to recover numeric latency values once the headroom is larger.
 * The `{sense_thresh_low/high}` span now captures “time to 90%” settling around the achievable ~30–50 mV swing; log `sense_thresh_latency` alongside the `sense_headroom_{min,max}` histograms in `logs/mismatch-mc*.csv` so every experiment has both energy and jitter recorded.
+
+### Guard/jitter ledger
+
+| Corner | Seeds | sense_thresh_latency (ps) | Headroom bin (mV) | Headroom max (V) | Edyn (pJ) | Eword_est (pJ) | Guard margin |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| ±10% mismatch MC (0.9/1.0/1.1 V) | 150 total (50/corner) | ~0.125 | 860–865 | ~0.900 | ≈0.313 | ≈3.34 | ≥20 mV above the 0.898–0.900 V guard window |
+| TT mismatch MC (1.0 V) | 50 | ~4.75 | 960–965 | ~1.002 | ≈−0.027 | ≈−0.29 | ≥60 mV margin from the same guard |

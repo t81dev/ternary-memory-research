@@ -7,10 +7,15 @@
   - **Encoder activity tie-in:** combine the typical 3–5 transitions/window workload with the amortized model `Eword ≈ Eleak + 0.33 pJ × transitions`, keeping the total encoder + shared-sense periphery estimate (~5–7 pJ/word) front-and-center in the ledger until the unified deck migrates to `spicemodels/`.
 - **Periphery ledger:** `models/periphery-cost-model.md` tracks energy vs. kill criterion, now citing the ±10% shared-sense runs.
 - **Mismatch MC headroom:** Running 50 seeds per corner at 0.9/1.0/1.1 V (and the matched TT sweep) with those thresholds now fills `logs/mismatch-mc/headroom_histogram.csv` (895–900 mV) and `logs/mismatch-mc-tt/headroom_histogram.csv` (995–1000 mV), so the ledger can keep documenting the low-swing guard while we work on latency tracking.
+- **Guard/jitter ledger:** The new `ttime("v(sharedDriveDiff)",...)` guard timing now populates `sense_thresh_latency` for every ±10%/TT seed, and those tuples plus the matching histograms are already mirrored in `models/periphery-cost-model.md`, `SUMMARY.md`, and this file. Keep regenerating the histogram CSVs together with the latency column so the guard story stays auditable before we graduate the deck.
+
+| Corner | Seeds | sense_thresh_latency (ps) | Headroom bin (mV) | Headroom max (V) | Edyn (pJ) | Eword_est (pJ) | Guard margin |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| ±10% mismatch MC (0.9/1.0/1.1 V) | 150 total (50/corner) | ~0.125 | 860–865 | ~0.900 | ≈0.313 | ≈3.34 | ≥20 mV above the 0.898–0.900 V guard window |
+| TT mismatch MC (1.0 V) | 50 | ~4.75 | 960–965 | ~1.002 | ≈−0.027 | ≈−0.29 | ≥60 mV margin from the same guard |
 
 ## Work in progress
-1. **Latency/jitter validation:** With the Monte Carlo sweep now logging the sense_thresh latency column (~0.125 ps at ±10%, ~4.75 ps at TT) alongside the headroom histograms, verify that every noise/clock-skew permutation plugs into `logs/mismatch-mc/mismatch_mc.csv`, `logs/mismatch-mc-tt/mismatch_mc_tt.csv`, and the hist files before we publish the guard/jitter ledger and migrate the deck into `spicemodels/`.
-2. **Controller APIs:** Confirm the ternary tokens remain substrate-neutral and the shared-sense driver keeps its jitter/latency headroom under the stressed patterns before moving the deck into `spicemodels/`, and tie every histogram/timing tuple to the same timeline so the energy story always pairs with the guard data.
+1. **Controller APIs:** Confirm the ternary tokens remain substrate-neutral and the shared-sense driver keeps its jitter/latency headroom under the stressed patterns before moving the deck into `spicemodels/`, and tie every histogram/timing tuple to the same timeline so the energy story always pairs with the guard data.
 
 ## Blockers
 - The comparator/driver still never reaches 0.5·VDD, so the `td_*`/`settle_*` `.meas` entries remain “out of interval”; until we can correlate the high headroom with the newly logged latency span, those timing probes stay cautionary while we rely on the new jitter numbers.

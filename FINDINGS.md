@@ -10,8 +10,8 @@
 - All shared-sense decks still pull the SkyWater models from `/Users/t81dev/Code/pdk/sky130A/libs.ref/sky130_fd_pr/…` (`spicemodels/option-b-encoder-with-shared-sense-mismatch.spice:63-66`), so the mismatch switches + zeroed slope knobs must stay synchronized for every run.
 
 ## Next steps
-1. Copy the ±10%/TT energy+headroom+lat tuples into `models/periphery-cost-model.md`, `STATUS.md`, and `SUMMARY.md` so the guard story keeps jitter & energy together before migrating the deck back into `spicemodels/`.
-2. Keep the timeline of histogram files (`logs/mismatch-mc/headroom_histogram.csv`, `logs/mismatch-mc-tt/headroom_histogram.csv`, plus any new noise/driver permutations) aligned with the latency column so the ledger stays auditable for periphery dominance and retiming/jitter margins.
+1. Mirror each ±10%/TT energy+headroom+lat tuple (including noise/clock-skew or driver permutations) into `models/periphery-cost-model.md`, `STATUS.md`, `SUMMARY.md`, and `experiments/shared-sense-periphery.md` so the guard story keeps jitter & energy together before migrating the deck back into `spicemodels/`.
+2. When rerunning the guard sweep, regenerate `logs/mismatch-mc/mismatch_mc.csv`, `logs/mismatch-mc-tt/mismatch_mc_tt.csv`, and their `headroom_histogram.csv` companions together so the latency column, histograms, and CSV tuples stay in sync; treat that aligned dataset as the canonical ledger for periphery dominance and retiming/jitter margins before migration.
 
 ## Baseline migration
 - The validated shared-sense deck now lives in `spicemodels/option-b-encoder-with-shared-sense-baseline.spice` (deterministic, mismatch switches off) and is documented in `spicemodels/README.md`. Treat this file as the canonical baseline before branching into subsequent noise/driver stress runs.
