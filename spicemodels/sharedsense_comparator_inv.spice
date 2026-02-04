@@ -1,0 +1,8 @@
+* Minimal skewed inverter comparator for sharedDriveDiff
+.param COMP_L=0.18u
+.param COMP_WP=12u
+.param COMP_WN=2u
+.subckt comp_inv out inp vdd gnd params: WP={COMP_WP} WN={COMP_WN} L={COMP_L}
+Xmp out inp vdd vdd sky130_fd_pr__pfet_01v8 model=sky130_fd_pr__pfet_01v8__ss l={L} w={WP} nf=1 ad={WP*L} as={WP*L} pd={2*(WP+L)} ps={2*(WP+L)} nrd=1 nrs=1 sa=0 sb=0 sd=0
+Xmn out inp gnd gnd sky130_fd_pr__nfet_01v8 model=sky130_fd_pr__nfet_01v8__ss l={L} w={WN} nf=1 ad={WN*L} as={WN*L} pd={2*(WN+L)} ps={2*(WN+L)} nrd=1 nrs=1 sa=0 sb=0 sd=0
+.ends comp_inv

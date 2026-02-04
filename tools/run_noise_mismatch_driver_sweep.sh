@@ -2,7 +2,7 @@
 set -euo pipefail
 
 deck="spicemodels/option-b-encoder-with-shared-sense-mismatch.spice"
-samples=50
+samples=${SAMPLES:-50}
 vdd_list=${1:-"0.9 1.0 1.1"}
 noise_amps=${NOISE_AMPS:-"5m 10m"}
 driver_scales=${DRIVER_SCALES:-"1.5 2.0 2.5 3.0"}
@@ -36,7 +36,7 @@ for scale in $driver_scales; do
     mkdir -p "$logdir"
     datafile="$logdir/mismatch_mc.csv"
     printf "# noise_amp=%s driver_scale=%s mismatch MC data\n" "$noise" "$scale" > "$datafile"
-    printf "vdd,seed,edyn,eword,sense_min,sense_max,sense_thresh_latency\n" >> "$datafile"
+    printf "vdd,seed,edyn,eword,sense_min,sense_max,sense_thresh_latency,comp_toggle_latency,comp_pass\n" >> "$datafile"
 
     for vdd in $vdd_list; do
       for seed in $(seq 1 "$samples"); do
@@ -44,8 +44,8 @@ for scale in $driver_scales; do
         printf ".option gseed=%s\n.param run_vdd=%s\n.param noise_amp=%s\n.param DRIVER_WN=%s\n.param DRIVER_WP=%s\n.run\n.quit\n" \
           "$seed" "$vdd" "$noise" "$driver_wn" "$driver_wp" | ngspice -b "$deck" -o "$logfile"
 
-        read edyn eword sense_min sense_max sense_thresh < <(tools/parse_mismatch_log.py "$logfile")
-        printf "%s,%s,%s,%s,%s,%s,%s\n" "$vdd" "$seed" "$edyn" "$eword" "$sense_min" "$sense_max" "$sense_thresh" >> "$datafile"
+        read edyn eword sense_min sense_max sense_thresh comp_toggle comp_pass < <(tools/parse_mismatch_log.py "$logfile")
+        printf "%s,%s,%s,%s,%s,%s,%s,%s,%s\n" "$vdd" "$seed" "$edyn" "$eword" "$sense_min" "$sense_max" "$sense_thresh" "$comp_toggle" "$comp_pass" >> "$datafile"
       done
     done
 

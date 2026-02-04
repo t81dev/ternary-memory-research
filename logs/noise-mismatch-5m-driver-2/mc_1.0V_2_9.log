@@ -248,12 +248,12 @@ sharedsensep_max    =  2.351298e-07 at=  4.917500e-09
 sharedsensen_min    =  -1.174396e-06 at=  1.191750e-08
 
 
-Total analysis time (seconds) = 5.38994
+Total analysis time (seconds) = 5.20196
 
-Total elapsed time (seconds) = 8.333 
+Total elapsed time (seconds) = 8.115 
 
 Total DRAM available = 8192.000 MB.
-DRAM currently available =   72.438 MB.
-Maximum ngspice program size =  286.641 MB.
-Current ngspice program size =  271.047 MB.
+DRAM currently available =   79.156 MB.
+Maximum ngspice program size =  286.922 MB.
+Current ngspice program size =  286.922 MB.
 
