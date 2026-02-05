@@ -1,0 +1,14 @@
+*-----------------------------------------------------------------
+* StrongARM sense latch for sharedDriveDiff feed
+*-----------------------------------------------------------------
+.subckt STRONGARM_INVERT sharedDriveP sharedDriveN comp_out vdd 0
+.param COMP_WP=2.2u
+.param COMP_WN=1.1u
+.param COMP_L=0.13u
+Xpf1 comp_out sharedDriveP out_int vdd sky130_fd_pr__pfet_01v8 params: l={COMP_L} w={COMP_WP} nf=1 ad={COMP_WP*COMP_L} as={COMP_WP*COMP_L} pd={2*(COMP_WP+COMP_L)} ps={2*(COMP_WP+COMP_L)} nrd=1 nrs=1 sa=0 sb=0 sd=0
+Xpf2 comp_out sharedDriveN out_int vdd sky130_fd_pr__pfet_01v8 params: l={COMP_L} w={COMP_WP} nf=1 ad={COMP_WP*COMP_L} as={COMP_WP*COMP_L} pd={2*(COMP_WP+COMP_L)} ps={2*(COMP_WP+COMP_L)} nrd=1 nrs=1 sa=0 sb=0 sd=0
+Xpf3 out_int sharedDriveP mid vdd sky130_fd_pr__pfet_01v8 params: l={COMP_L} w={COMP_WP} nf=1 ad={COMP_WP*COMP_L} as={COMP_WP*COMP_L} pd={2*(COMP_WP+COMP_L)} ps={2*(COMP_WP+COMP_L)} nrd=1 nrs=1 sa=0 sb=0 sd=0
+Xpf4 out_int sharedDriveN mid vdd sky130_fd_pr__pfet_01v8 params: l={COMP_L} w={COMP_WP} nf=1 ad={COMP_WP*COMP_L} as={COMP_WP*COMP_L} pd={2*(COMP_WP+COMP_L)} ps={2*(COMP_WP+COMP_L)} nrd=1 nrs=1 sa=0 sb=0 sd=0
+Xnf1 comp_out mid 0 0 sky130_fd_pr__nfet_01v8 params: l={COMP_L} w={COMP_WN} nf=1 ad={COMP_WN*COMP_L} as={COMP_WN*COMP_L} pd={2*(COMP_WN+COMP_L)} ps={2*(COMP_WN+COMP_L)} nrd=1 nrs=1 sa=0 sb=0 sd=0
+Xnf2 comp_out comp_out 0 0 sky130_fd_pr__nfet_01v8 params: l={COMP_L} w={COMP_WN} nf=1 ad={COMP_WN*COMP_L} as={COMP_WN*COMP_L} pd={2*(COMP_WN+COMP_L)} ps={2*(COMP_WN+COMP_L)} nrd=1 nrs=1 sa=0 sb=0 sd=0
+.ends

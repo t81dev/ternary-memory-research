@@ -9,6 +9,8 @@ Tracks the shared comparator + driver decks that feed the Option-B encoder outpu
 
 The `0.9 V` run proves the shared sense logic adds almost zero extra energy at the low rail, while the `1.1 V` run shows the periphery stays below 6.6 pJ even when the driver uses the cleaner headroom. Recording the min/max differential (`sharedSenseDiff`) keeps the kill-criterion story traceable despite the failed `td` probes.
 
+The latest round of noise/driver sweeps (5 mV/10 mV × scale 1.5/2.0/2.5) plus the ±10%/TT mismatch MC entries are now re-parsed with `tools/parse_mismatch_log.py`, so each `logs/*/mismatch_mc.csv` explicitly carries `sense_min/max`, `sense_thresh_latency`, and `comp_pass`. Every valid row still reports `comp_pass=failed` even though the 860–865 mV bins and ≈3.34 pJ `Eword_est` persist, so the comparator path has not yet toggled before considering driver upsizing or topology tweaks. The reparse also rewrote the `headroom_histogram.csv` files so the hist counts align with the seed totals (150 per driver scale/VDD combination, 150 total for ±10%/TT, etc.), keeping the guard/jitter ledger auditable before the deck migrates back into `spicemodels/`.
+
 ### Pending / blocked actions
 
 * **TT corner deck:** `option-b-encoder-with-shared-sense-tt.spice` currently aborts because the TT corner includes a subcircuit with 13 formal parameters; our instantiation passes none. We need to ① either replicate those parameters when instantiating the corner (painful) or ② include the TT models with `process_switch=1` in the SS deck and rely on the same measurement plumbing (practical).  
@@ -27,4 +29,4 @@ The `0.9 V` run proves the shared sense logic adds almost zero extra energy at
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | ±10% mismatch MC (0.9/1.0/1.1 V) | 150 total (50/corner) | ~0.125 | 860–865 | ~0.900 | ≈0.313 | ≈3.34 | ≥20 mV above the 0.898–0.900 V guard window |
 | TT mismatch MC (1.0 V) | 50 | ~4.75 | 960–965 | ~1.002 | ≈−0.027 | ≈−0.29 | ≥60 mV margin from the same guard |
-| Noise + driver sweep (5 mV/10 mV × scale 1.5/2.0/2.5) | 150 each | ~0.125 | 860–865 | ~0.900 | ≈0.313 | ≈3.34 | Driver scale changes preserve the guard, see `logs/noise-mismatch-{5m,10m}-driver-{1p5,2,2p5}/mismatch_mc.csv` |
+| Noise + driver sweep (5 mV/10 mV × scale 1.5/2.0/2.5) | 150 each (153 for boosted 2.5) | ~0.125 | 860–865 | ~0.900 | ≈0.313 | ≈3.34 | Driver scale changes preserve the guard, see `logs/noise-mismatch-{5m,10m}-driver-{1p5,2,2p5}/mismatch_mc.csv`; every valid tuple records `comp_pass=failed` |

@@ -3,6 +3,12 @@ set -euo pipefail
 
 deck="spicemodels/option-b-encoder-with-shared-sense-mismatch.spice"
 samples=${SAMPLES:-50}
+seed_start=${SEED_START:-1}
+max_seed=${MAX_SEED:-50}
+seed_end=$((seed_start + samples - 1))
+if [ "$seed_end" -gt "$max_seed" ]; then
+  seed_end=$max_seed
+fi
 vdd_list=${1:-"0.9 1.0 1.1"}
 noise_amps=${NOISE_AMPS:-"5m 10m"}
 driver_scales=${DRIVER_SCALES:-"1.5 2.0 2.5 3.0"}
@@ -35,11 +41,18 @@ for scale in $driver_scales; do
     logdir="logs/noise-mismatch-${noise}-driver-${scale_tag}"
     mkdir -p "$logdir"
     datafile="$logdir/mismatch_mc.csv"
-    printf "# noise_amp=%s driver_scale=%s mismatch MC data\n" "$noise" "$scale" > "$datafile"
-    printf "vdd,seed,edyn,eword,sense_min,sense_max,sense_thresh_latency,comp_toggle_latency,comp_pass\n" >> "$datafile"
+    if [ ! -f "$datafile" ]; then
+      printf "# noise_amp=%s driver_scale=%s mismatch MC data\n" "$noise" "$scale" > "$datafile"
+      printf "vdd,seed,edyn,eword,sense_min,sense_max,sense_thresh_latency,comp_toggle_latency,comp_pass\n" >> "$datafile"
+    fi
 
     for vdd in $vdd_list; do
-      for seed in $(seq 1 "$samples"); do
+    if [ "$seed_start" -gt "$seed_end" ]; then
+      echo "No seeds to run (seed_start=$seed_start, seed_end=$seed_end)."
+      continue
+    fi
+
+    for seed in $(seq "$seed_start" "$seed_end"); do
         logfile="$logdir/mc_$(printf '%.1f' "$vdd")V_${scale_tag}_${seed}.log"
         printf ".option gseed=%s\n.param run_vdd=%s\n.param noise_amp=%s\n.param DRIVER_WN=%s\n.param DRIVER_WP=%s\n.run\n.quit\n" \
           "$seed" "$vdd" "$noise" "$driver_wn" "$driver_wp" | ngspice -b "$deck" -o "$logfile"
