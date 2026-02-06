@@ -27,10 +27,24 @@ normalize_scale_tag() {
 import sys
 tag = sys.argv[1].replace(".", "p")
 if tag.endswith("p0"):
-    tag = tag[:-2]
+  tag = tag[:-2]
 print(tag)
 PY
 }
+
+build_comp_param_block() {
+  local names=(COMP_WP COMP_WN COMP_CROSS_SCALE COMP_TAIL_SCALE COMP_LOAD_SCALE COMP_WP_CROSS COMP_WN_TAIL COMP_WN_LOAD COMP_FORCE_DELTA COMP_CLK_DELAY COMP_CLK_TR COMP_CLK_TF COMP_CLK_HIGH COMP_CLK_PERIOD COMP_TOPOLOGY COMP_DT_IN COMP_DT_TAIL_PRE COMP_DT_TAIL_LATCH COMP_DT_LATCH COMP_DT_PMOS COMP_DT_INV_WN COMP_DT_INV_WP)
+  local block=""
+  for name in "${names[@]}"; do
+    local val="${!name:-}"
+    if [ -n "$val" ]; then
+      block+=$(printf ".param %s=%s\n" "$name" "$val")
+    fi
+  done
+  printf "%s" "$block"
+}
+
+comp_param_block=$(build_comp_param_block)
 
 for scale in $driver_scales; do
   driver_wn=$(compute_width "$scale" 2)
@@ -54,8 +68,8 @@ for scale in $driver_scales; do
 
     for seed in $(seq "$seed_start" "$seed_end"); do
         logfile="$logdir/mc_$(printf '%.1f' "$vdd")V_${scale_tag}_${seed}.log"
-        printf ".option gseed=%s\n.param run_vdd=%s\n.param noise_amp=%s\n.param DRIVER_WN=%s\n.param DRIVER_WP=%s\n.run\n.quit\n" \
-          "$seed" "$vdd" "$noise" "$driver_wn" "$driver_wp" | ngspice -b "$deck" -o "$logfile"
+        printf ".option gseed=%s\n.param run_vdd=%s\n.param noise_amp=%s\n.param DRIVER_WN=%s\n.param DRIVER_WP=%s\n%s.run\n.quit\n" \
+          "$seed" "$vdd" "$noise" "$driver_wn" "$driver_wp" "$comp_param_block" | ngspice -b "$deck" -o "$logfile"
 
         read edyn eword sense_min sense_max sense_thresh comp_toggle comp_pass < <(tools/parse_mismatch_log.py "$logfile")
         printf "%s,%s,%s,%s,%s,%s,%s,%s,%s\n" "$vdd" "$seed" "$edyn" "$eword" "$sense_min" "$sense_max" "$sense_thresh" "$comp_toggle" "$comp_pass" >> "$datafile"

@@ -1,0 +1,35 @@
+* Double-tail comparator for shared sense node
+* Inputs: vinp, vinn, clk, outputs comp_dt_out
+
+.subckt DOUBLE_TAIL_COMP vinp vinn clk comp_dt_out vdd 0
+  params: W_in={COMP_DT_IN} W_tail_pre={COMP_DT_TAIL_PRE} W_tail_latch={COMP_DT_TAIL_LATCH} W_latch={COMP_DT_LATCH} W_pmos={COMP_DT_PMOS} W_inv_wn={COMP_DT_INV_WN} W_inv_wp={COMP_DT_INV_WP} L=0.15u NFET_MODEL=sky130_fd_pr__nfet_01v8__ss PFET_MODEL=sky130_fd_pr__pfet_01v8__ss MULT=1
+  .param l={L}
+  .param mult={MULT}
+
+  .param w={W_in}
+M1 prexp vinp tail_pre 0 {NFET_MODEL} l={L} w={W_in} mult={MULT} nf=2 ad={W_in*L} as={W_in*L} pd={2*(W_in+L)} ps={2*(W_in+L)} nrd=1 nrs=1 sa=0 sb=0 sd=0
+M2 prexn vinn tail_pre 0 {NFET_MODEL} l={L} w={W_in} mult={MULT} nf=2 ad={W_in*L} as={W_in*L} pd={2*(W_in+L)} ps={2*(W_in+L)} nrd=1 nrs=1 sa=0 sb=0 sd=0
+
+  .param w={W_pmos}
+M3 prexp vdd vdd vdd {PFET_MODEL} l={L} w={W_pmos} mult={MULT} nf=2 ad={W_pmos*L} as={W_pmos*L} pd={2*(W_pmos+L)} ps={2*(W_pmos+L)} nrd=1 nrs=1 sa=0 sb=0 sd=0
+M4 prexn vdd vdd vdd {PFET_MODEL} l={L} w={W_pmos} mult={MULT} nf=2 ad={W_pmos*L} as={W_pmos*L} pd={2*(W_pmos+L)} ps={2*(W_pmos+L)} nrd=1 nrs=1 sa=0 sb=0 sd=0
+
+  .param w={W_tail_pre}
+M5 tail_pre clk 0 0 {NFET_MODEL} l={L} w={W_tail_pre} mult={MULT} nf=4 ad={W_tail_pre*L} as={W_tail_pre*L} pd={2*(W_tail_pre+L)} ps={2*(W_tail_pre+L)} nrd=1 nrs=1 sa=0 sb=0 sd=0
+
+* Regenerative latch (cross-coupled)
+  .param w={W_latch}
+M6 lxp prexp latch_tail 0 {NFET_MODEL} l={L} w={W_latch} mult={MULT} nf=3 ad={W_latch*L} as={W_latch*L} pd={2*(W_latch+L)} ps={2*(W_latch+L)} nrd=1 nrs=1 sa=0 sb=0 sd=0
+M7 lxn prexn latch_tail 0 {NFET_MODEL} l={L} w={W_latch} mult={MULT} nf=3 ad={W_latch*L} as={W_latch*L} pd={2*(W_latch+L)} ps={2*(W_latch+L)} nrd=1 nrs=1 sa=0 sb=0 sd=0
+
+  .param w={W_pmos}
+M8 lxp lxn vdd vdd {PFET_MODEL} l={L} w={W_pmos} mult={MULT} nf=2 ad={W_pmos*L} as={W_pmos*L} pd={2*(W_pmos+L)} ps={2*(W_pmos+L)} nrd=1 nrs=1 sa=0 sb=0 sd=0
+  .param w={W_pmos}
+M9 lxn lxp vdd vdd {PFET_MODEL} l={L} w={W_pmos} mult={MULT} nf=2 ad={W_pmos*L} as={W_pmos*L} pd={2*(W_pmos+L)} ps={2*(W_pmos+L)} nrd=1 nrs=1 sa=0 sb=0 sd=0
+
+  .param w={W_tail_latch}
+M10 latch_tail clk 0 0 {NFET_MODEL} l={L} w={W_tail_latch} mult={MULT} nf=4 ad={W_tail_latch*L} as={W_tail_latch*L} pd={2*(W_tail_latch+L)} ps={2*(W_tail_latch+L)} nrd=1 nrs=1 sa=0 sb=0 sd=0
+
+Xinv_dt lxp comp_dt_out vdd 0 INV WN={W_inv_wn} WP={W_inv_wp} L={L}
+
+.ends DOUBLE_TAIL_COMP

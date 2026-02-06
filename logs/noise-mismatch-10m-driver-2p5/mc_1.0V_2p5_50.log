@@ -191,8 +191,8 @@ shareddrivep                               0.9
 shareddriven                                 0
 boostp_node                                0.9
 boostn_node                                  0
-clk                                          0
 shareddrivediff                           0.86
+clk                                          0
 comp_out                           0.000189465
 xcomp.out_int                         0.360007
 xcomp.mid                             0.371916
@@ -250,7 +250,7 @@ eslice              =  7.77210e-14
 eword_est           =  3.34200e-12
 sense_headroom_min  =  8.600000e-01 at=  0.000000e+00
 sense_headroom_max  =  9.003074e-01 at=  3.217250e-08
-sense_diff_min      =  -5.163625e-07 at=  1.145750e-08
+sense_diff_min      =  -5.163626e-07 at=  1.145750e-08
 sense_diff_max      =  1.170710e-06 at=  1.192250e-08
 sense_thresh_latency=  1.249970e-13 targ=  4.024899e-10 trig=  4.023649e-10
 comp_out_max        =  1.972215e-04 at=  3.226250e-08
@@ -259,12 +259,12 @@ sharedsensep_max    =  2.351297e-07 at=  4.917500e-09
 sharedsensen_min    =  -1.174396e-06 at=  1.191750e-08
 
 
-Total analysis time (seconds) = 8.98663
+Total analysis time (seconds) = 5.21353
 
-Total elapsed time (seconds) = 13.888 
+Total elapsed time (seconds) = 8.108 
 
 Total DRAM available = 8192.000 MB.
-DRAM currently available =   83.281 MB.
-Maximum ngspice program size =  291.266 MB.
-Current ngspice program size =  291.266 MB.
+DRAM currently available =  113.797 MB.
+Maximum ngspice program size =  290.812 MB.
+Current ngspice program size =  278.562 MB.
 

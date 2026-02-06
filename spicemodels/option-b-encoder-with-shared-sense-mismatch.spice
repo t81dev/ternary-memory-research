@@ -49,6 +49,26 @@
 .param COMP_WP=12u
 .param COMP_WN=2u
 .param COMP_L=0.18u
+.param COMP_CROSS_SCALE=1
+.param COMP_TAIL_SCALE=1
+.param COMP_LOAD_SCALE=1
+.param COMP_WP_CROSS={COMP_WP*COMP_CROSS_SCALE}
+.param COMP_WN_TAIL={COMP_WN*COMP_TAIL_SCALE}
+.param COMP_WN_LOAD={COMP_WN*COMP_LOAD_SCALE}
+.param COMP_FORCE_DELTA=0
+.param COMP_CLK_DELAY=0.1n
+.param COMP_CLK_TR=0.1n
+.param COMP_CLK_TF=0.1n
+.param COMP_CLK_HIGH=5n
+.param COMP_CLK_PERIOD=10n
+.param COMP_TOPOLOGY=0  ; 0=strong-arm, 1=double-tail
+.param COMP_DT_IN=8u
+.param COMP_DT_TAIL_PRE=4u
+.param COMP_DT_TAIL_LATCH=5u
+.param COMP_DT_LATCH=6u
+.param COMP_DT_PMOS=10u
+.param COMP_DT_INV_WN=0.5u
+.param COMP_DT_INV_WP=1u
 
 ********************************
 * PFET mismatch diff defaults (zero out all slope offsets)
@@ -71,6 +91,7 @@
 .include "/Users/t81dev/Code/pdk/sky130A/libs.ref/sky130_fd_pr/spice/sky130_fd_pr__pfet_01v8__mismatch.corner.spice"
 .include "sharedsense_comparator_inv.spice"
 .include "sharedsense_comparator_strongarm.spice"
+.include "sharedsense_comparator_doubletail.spice"
 
 ********************************
 * Supplies
@@ -249,9 +270,11 @@ RboostP sharedDriveP boostP_node {BOOST_R}
 RboostN sharedDriveN boostN_node {BOOST_R}
 XboostP boostP_node sharedDriveN vdd vdd sky130_fd_pr__pfet_01v8 model=sky130_fd_pr__pfet_01v8__ss l={BOOST_L} w={BOOST_WP} nf=1 ad={BOOST_WP*BOOST_L} as={BOOST_WP*BOOST_L} pd={2*(BOOST_WP+BOOST_L)} ps={2*(BOOST_WP+BOOST_L)} nrd=1 nrs=1 sa=0 sb=0 sd=0
 XboostN boostN_node sharedDriveP 0 0 sky130_fd_pr__nfet_01v8 model=sky130_fd_pr__nfet_01v8__ss l={BOOST_L} w={BOOST_WN} nf=1 ad={BOOST_WN*BOOST_L} as={BOOST_WN*BOOST_L} pd={2*(BOOST_WN+BOOST_L)} ps={2*(BOOST_WN+BOOST_L)} nrd=1 nrs=1 sa=0 sb=0 sd=0
-Vcomp_clk CLK 0 PULSE(0 {VDD} 0.1n 0.1n 0.1n 5n 10n)
-BdriveDiff sharedDriveDiff 0 V={V(sharedDriveP)-V(sharedDriveN)+(time<{sense_latency_prebias_dur}?{sense_latency_prebias}:0)}
-Xcomp sharedDriveP sharedDriveN comp_out vdd 0 STRONGARM_INVERT COMP_WP={COMP_WP} COMP_WN={COMP_WN} COMP_L={COMP_L} PFET_MODEL="sky130_fd_pr__pfet_01v8__model.0" NFET_MODEL="sky130_fd_pr__nfet_01v8__model.0"
+BdriveDiff sharedDriveDiff 0 V={V(sharedDriveP)-V(sharedDriveN)+(time<{sense_latency_prebias_dur}?{sense_latency_prebias}:0)+{COMP_FORCE_DELTA}}
+Bcomp_out comp_out 0 V={COMP_TOPOLOGY ? V(comp_dt_out) : V(comp_sa_out)}
+Vcomp_clk CLK 0 PULSE(0 {VDD} {COMP_CLK_DELAY} {COMP_CLK_TR} {COMP_CLK_TF} {COMP_CLK_HIGH} {COMP_CLK_PERIOD})
+Xcomp_sa sharedDriveP sharedDriveN comp_sa_out vdd 0 STRONGARM_INVERT COMP_WP={COMP_WP} COMP_WN={COMP_WN} COMP_L={COMP_L} COMP_WP_CROSS={COMP_WP_CROSS} COMP_WN_TAIL={COMP_WN_TAIL} COMP_WN_LOAD={COMP_WN_LOAD} PFET_MODEL=sky130_fd_pr__pfet_01v8__ss NFET_MODEL=sky130_fd_pr__nfet_01v8__ss
+Xcomp_dt sharedDriveP sharedDriveN CLK comp_dt_out vdd 0 DOUBLE_TAIL_COMP W_in={COMP_DT_IN} W_tail_pre={COMP_DT_TAIL_PRE} W_tail_latch={COMP_DT_TAIL_LATCH} W_latch={COMP_DT_LATCH} W_pmos={COMP_DT_PMOS} W_inv_wn={COMP_DT_INV_WN} W_inv_wp={COMP_DT_INV_WP} NFET_MODEL=sky130_fd_pr__nfet_01v8__ss PFET_MODEL=sky130_fd_pr__pfet_01v8__ss MULT=1
 
 ********************************
 ********************************
