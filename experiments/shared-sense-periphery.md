@@ -51,4 +51,5 @@ Use `tools/run_shared_sense_phase_skew.sh` to sweep `PHASE_SKEW_NS=±0.5n` (thre
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | ±10% mismatch MC (0.9/1.0/1.1 V) | 150 total (50/corner) | ~0.125 | 860–865 | ~0.900 | ≈0.313 | ≈3.34 | ≥20 mV above the 0.898–0.900 V guard window |
 | TT mismatch MC (1.0 V) | 50 | ~4.75 | 960–965 | ~1.002 | ≈−0.027 | ≈−0.29 | ≥60 mV margin from the same guard |
+- **Ledger alignment:** reference `data/canonical_guard_ledger.csv` (see `data/GUARD_LEDGER_MANIFEST.md`) for the numeric rows that back this table; rerun `python3 tools/export_guard_ledger.py data/canonical_guard_ledger.csv` whenever the `logs/*/mismatch_mc*.csv` or their `headroom_histogram.csv` companions are refreshed so the document, the ledger, and the histograms stay tightly coupled.
 | Noise + driver sweep (5 mV/10 mV × scale 1.5/2.0/2.5) | 150 each (153 for boosted 2.5) | ~0.125 | 860–865 | ~0.900 | ≈0.313 | ≈3.34 | Driver scale changes preserve the guard, see `logs/noise-mismatch-{5m,10m}-driver-{1p5,2,2p5}/mismatch_mc.csv`; every valid tuple records `comp_pass=failed` |
