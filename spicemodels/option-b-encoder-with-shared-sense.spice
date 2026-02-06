@@ -21,6 +21,8 @@
 .param CLOAD=50f
 .param CDRV=25f
 .param TSTOP=40n
+.param B0_START=1n
+.param B1_START=2n
 
 * Scaling assumptions
 * 3 input bits per slice → ~43 slices for a 128-bit word
@@ -221,8 +223,8 @@ XboostN boostN_node sharedDriveP 0 0 sky130_fd_pr__nfet_01v8 model=sky130_fd_pr_
 ********************************
 * Stimulus (dual-bit medium-activity pattern)
 ********************************
-Vb0 b0 0 PULSE(0 {VDD} 1n 50p 50p 10n 20n)
-Vb1 b1 0 PULSE(0 {VDD} 2n 50p 50p 11n 22n)
+Vb0 b0 0 PULSE(0 {VDD} {B0_START} 50p 50p 10n 20n)
+Vb1 b1 0 PULSE(0 {VDD} {B1_START} 50p 50p 11n 22n)
 Vb2 b2 0 0
 
 ********************************

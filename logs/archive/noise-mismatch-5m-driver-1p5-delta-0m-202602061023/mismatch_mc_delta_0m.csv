@@ -1,0 +1,2 @@
+# noise_amp=5m driver_scale=1.5 comp_force_delta=0m mismatch MC data
+vdd,seed,comp_force_delta,edyn,eword,sense_min,sense_max,sense_thresh_latency,comp_toggle_latency,comp_pass

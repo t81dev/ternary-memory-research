@@ -11,6 +11,28 @@ The `0.9 V` run proves the shared sense logic adds almost zero extra energy at
 
 The latest round of noise/driver sweeps (5 mV/10 mV × scale 1.5/2.0/2.5) plus the ±10%/TT mismatch MC entries are now re-parsed with `tools/parse_mismatch_log.py`, so each `logs/*/mismatch_mc.csv` explicitly carries `sense_min/max`, `sense_thresh_latency`, and `comp_pass`. Every valid row still reports `comp_pass=failed` even though the 860–865 mV bins and ≈3.34 pJ `Eword_est` persist, so the comparator path has not yet toggled before considering driver upsizing or topology tweaks. The reparse also rewrote the `headroom_histogram.csv` files so the hist counts align with the seed totals (150 per driver scale/VDD combination, 150 total for ±10%/TT, etc.), keeping the guard/jitter ledger auditable before the deck migrates back into `spicemodels/`.
 
+### 8–16 slice OR aggregation glimpses
+
+To verify that the shared comparator/driver remains bounded as more encoder slices feed the OR tree, we now capture deterministic glimpses with eight and sixteen slices. Copy the `Xenc*`/`Ctp*`/`Ctn*` blocks in `spicemodels/option-b-encoder-with-shared-sense*.spice` so `NSLICES_IN_DECK` equals 8 or 16, then run the same pseudo-random stimulus (or the MC deck with `mismatch_switch=0`) while keeping `sense_thresh_latency`, `sense_headroom_min/max`, and `sharedSenseDiff` probes unchanged. Log each run in `logs/shared-sense-glimpse-8slice` / `logs/shared-sense-glimpse-16slice`, regenerate the matching `headroom_histogram.csv` using `tools/headroom_histogram.py`, and make sure `models/periphery-cost-model.md` points to those CSVs so the energy/headroom scaling story stays parallel to the four-slice baseline.
+
+These glimpses confirm that `Eslice` (measured via `.meas tran Eslice PARAM='Edyn/NSLICES_IN_DECK'`) still averages to ≈0.11–0.13 pJ and that the guard bin stays in the 860–865 mV neighborhood, validating the “periphery dominance (2)” ledger before any deck migration or controller retiming adjustments.
+
+- **Run summary:** the glimpses now sweep ±10% VDD (0.9/1.0/1.1 V) with two seeds per corner so each `logs/shared-sense-glimpse-{8,16}/mismatch_mc.csv` includes a full triplet of energy/headroom/jitter samples plus a `headroom_histogram.csv` that covers the −297 … −233 mV bin. The 8-slice data still shows `Edyn` between ≈−0.45 pJ (at 0.9 V) and ≈0.52 pJ (at 1.0 V) with `Eword_est ≈ 2.4–2.8 pJ` and `sense_thresh_latency` shrinking from ≈4.6 ps at 0.9 V to ≈1.1 ps at 1.1 V. The 16-slice path mirrors that energy range (≈−0.92 pJ at 0.9 V to ≈0.95 pJ at 1.1 V) while `sense_thresh_latency` stays inside the 1–5 ps window and the headroom histogram range stays within −297 … −233 mV. These samples prove the aggregated driver still respects the ≈5–7 pJ/word ledger even as we scale the OR tree before finally migrating the deck.
+
+### Driver/noise permutation log
+
+Every new driver-scale or noise-amplitude permutation must be captured in this log before we update the periphery ledger. Continue running `tools/run_noise_mismatch_driver_sweep.sh` with the scripted `DRIVER_SCALES=(1.5 2.0 2.5)` (and any upcoming 3.0/3.5 entries) for both `NOISE_AMPS=(5m 10m)` so the resulting tuples land in `logs/noise-mismatch-{5m,10m}-driver-{1p5,2,2p5}` (or `-3p5`, `-4`, etc.). For each new directory:
+
+- Record `sense_thresh_latency` and `sense_headroom_min/max` in the CSV so the histogram generator can stay in sync.
+- Keep the `headroom_histogram.csv` counts matched to the number of seeds logged (use `tools/headroom_histogram.py` after each chunked run).
+- Reference the histogram/latency tuple from `models/periphery-cost-model.md` (the guard/jitter table near “Shared sense integration”) so the energy story and timing story stay paired.
+
+If you introduce a new driver/noise combo (e.g., adding `DRIVER_SCALE=3.5` or extra `noise_amp`), append a short summary row to this document describing the observed `Edyn`, `Eword_est`, and headroom bin so the experiments log stays the canonical ledger for future comparisons.
+
+### Phase-skew / clock jitter stress
+
+Use `tools/run_shared_sense_phase_skew.sh` to sweep `PHASE_SKEW_NS=±0.5n` (three points) while leaving the shared driver toggles otherwise untouched. Each run writes `logs/shared-sense-phase-skew/mc_ps*.log`; aggregate them with `tools/aggregate_phase_skew_logs.py` and regenerate the `headroom_histogram.csv` so the vectors stay paired with the new `sense_thresh_latency` column (≈1.95 ps across the ±0.5 ns shifts). The resulting ledger now documents how the latency window plus the ←270 mV headroom bin move as the inter-slice skew varies, proving the jitter guard stays intact before committing the deck back to `spicemodels/`. Include those CSV/hist references whenever you quote the guard/jitter tuple so the new clock-skew story stays auditable.
+
 ### Pending / blocked actions
 
 * **TT corner deck:** `option-b-encoder-with-shared-sense-tt.spice` currently aborts because the TT corner includes a subcircuit with 13 formal parameters; our instantiation passes none. We need to ① either replicate those parameters when instantiating the corner (painful) or ② include the TT models with `process_switch=1` in the SS deck and rely on the same measurement plumbing (practical).  

@@ -14,64 +14,35 @@
 *   When you want MC, flip the *_switch params to 1 intentionally.
 *
 
-.param run_vdd=0.9
-.param VDD={run_vdd}
-.param PDK_SPICE_DIR="/Users/t81dev/Code/pdk/sky130A/libs.ref/sky130_fd_pr/spice"
 ********************************
 * Global params
 ********************************
+.param VDD=1.0
 .param CLOAD=50f
 .param CDRV=25f
 .param TSTOP=40n
+.param B0_START=1n
+.param B1_START=2n
 
 * Scaling assumptions
 * 3 input bits per slice → ~43 slices for a 128-bit word
 .param NSLICES=43
-.param NSLICES_IN_DECK=4
+.param NSLICES_IN_DECK=8
 
 ********************************
 * SKY130 model control switches
 * (required by sky130_fd_pr corner decks)
 ********************************
-.param mc_mm_switch=1
-.param mc_pr_switch=1
-.param mc_switch=1
-.param mismatch_switch=1
-.param process_switch=1
-
-.incdir /Users/t81dev/Code/pdk/sky130A/libs.ref/sky130_fd_pr/spice
+.param mc_mm_switch=0
+.param mc_pr_switch=0
+.param mc_switch=0
+.param mismatch_switch=0
+.param process_switch=0
 
 .param sense_thresh_low=0.03
 .param sense_thresh_high=0.05
-.param sense_latency_low=0.899
-.param sense_latency_high=0.900
 .param noise_amp=7m
 .param noise_freq=1e8
-.param sense_latency_prebias=-0.04
-.param sense_latency_prebias_dur=0.4n
-.param COMP_WP=12u
-.param COMP_WN=2u
-.param COMP_L=0.18u
-.param COMP_CROSS_SCALE=1
-.param COMP_TAIL_SCALE=1
-.param COMP_LOAD_SCALE=1
-.param COMP_WP_CROSS={COMP_WP*COMP_CROSS_SCALE}
-.param COMP_WN_TAIL={COMP_WN*COMP_TAIL_SCALE}
-.param COMP_WN_LOAD={COMP_WN*COMP_LOAD_SCALE}
-.param COMP_FORCE_DELTA=0
-.param COMP_CLK_DELAY=0.1n
-.param COMP_CLK_TR=0.1n
-.param COMP_CLK_TF=0.1n
-.param COMP_CLK_HIGH=5n
-.param COMP_CLK_PERIOD=10n
-.param COMP_TOPOLOGY=0  ; 0=strong-arm, 1=double-tail
-.param COMP_DT_IN=8u
-.param COMP_DT_TAIL_PRE=4u
-.param COMP_DT_TAIL_LATCH=5u
-.param COMP_DT_LATCH=6u
-.param COMP_DT_PMOS=10u
-.param COMP_DT_INV_WN=0.5u
-.param COMP_DT_INV_WP=1u
 
 ********************************
 * PFET mismatch diff defaults (zero out all slope offsets)
@@ -85,45 +56,17 @@
 .param sky130_fd_pr__pfet_01v8__wkvth0_diff=0
 .param sky130_fd_pr__pfet_01v8__wlod_diff=0
 
-.********************************
-* Include SKY130 device models + comparator
 ********************************
-.include "sky130_fd_pr__nfet_01v8__ss.corner.spice"
-.include "sky130_fd_pr__pfet_01v8__ss.corner.spice"
-.include "sky130_fd_pr__nfet_01v8__mismatch.corner.spice"
-.include "sky130_fd_pr__pfet_01v8__mismatch.corner.spice"
-.include "sky130_fd_pr__pfet_01v8__ss.pm3.spice"
-.include "sky130_fd_pr__nfet_01v8__ss.pm3.spice"
-.include "sharedsense_comparator_inv.spice"
-.include "sharedsense_comparator_strongarm.spice"
-.include "sharedsense_comparator_doubletail.spice"
+* Include SKY130 device models
+********************************
+.include "/Users/t81dev/Code/pdk/sky130A/libs.ref/sky130_fd_pr/spice/sky130_fd_pr__nfet_01v8__ss.corner.spice"
+.include "/Users/t81dev/Code/pdk/sky130A/libs.ref/sky130_fd_pr/spice/sky130_fd_pr__pfet_01v8__ss.corner.spice"
+.include "/Users/t81dev/Code/pdk/sky130A/libs.ref/sky130_fd_pr/spice/sky130_fd_pr__nfet_01v8__mismatch.corner.spice"
+.include "/Users/t81dev/Code/pdk/sky130A/libs.ref/sky130_fd_pr/spice/sky130_fd_pr__pfet_01v8__mismatch.corner.spice"
 
 ********************************
 * Supplies
 ********************************
-.param MC_MM_SWITCH=1
-.param MC_PR_SWITCH=1
-.param MC_SWITCH=1
-.param MISMATCH_SWITCH=1
-.param PROCESS_SWITCH=1
-
-.param sky130_fd_pr__pfet_01v8__toxe_slope=0
-.param sky130_fd_pr__pfet_01v8__toxe_slope1=0
-.param sky130_fd_pr__pfet_01v8__vth0_slope=0
-.param sky130_fd_pr__pfet_01v8__vth0_slope1=0
-.param sky130_fd_pr__pfet_01v8__voff_slope=0
-.param sky130_fd_pr__pfet_01v8__voff_slope1=0
-.param sky130_fd_pr__pfet_01v8__nfactor_slope=0
-.param sky130_fd_pr__pfet_01v8__nfactor_slope1=0
-.param sky130_fd_pr__nfet_01v8__toxe_slope=0
-.param sky130_fd_pr__nfet_01v8__toxe_slope1=0
-.param sky130_fd_pr__nfet_01v8__vth0_slope=0
-.param sky130_fd_pr__nfet_01v8__vth0_slope1=0
-.param sky130_fd_pr__nfet_01v8__voff_slope=0
-.param sky130_fd_pr__nfet_01v8__voff_slope1=0
-.param sky130_fd_pr__nfet_01v8__nfactor_slope=0
-.param sky130_fd_pr__nfet_01v8__nfactor_slope1=0
-
 VDD vdd 0 {VDD}
 
 ********************************
@@ -226,13 +169,21 @@ Xnor_or a b nor_ab vdd 0 NOR2
 Xinv_or nor_ab y vdd 0 INV
 .ends
 
-.subckt SENSE_SHARED tP0 tP1 tP2 tP3 tN0 tN1 tN2 tN3 senseP senseN vdd 0
+.subckt SENSE_SHARED tP0 tP1 tP2 tP3 tP4 tP5 tP6 tP7 tN0 tN1 tN2 tN3 tN4 tN5 tN6 tN7 senseP senseN vdd 0
 Xor_p01 tP0 tP1 orp01 vdd 0 OR2
 Xor_p23 tP2 tP3 orp23 vdd 0 OR2
-Xor_p_all orp01 orp23 senseP vdd 0 OR2
+Xor_p45 tP4 tP5 orp45 vdd 0 OR2
+Xor_p67 tP6 tP7 orp67 vdd 0 OR2
+Xor_p_0123 orp01 orp23 orp0123 vdd 0 OR2
+Xor_p_4567 orp45 orp67 orp4567 vdd 0 OR2
+Xor_p_all orp0123 orp4567 senseP vdd 0 OR2
 Xor_n01 tN0 tN1 orn01 vdd 0 OR2
 Xor_n23 tN2 tN3 orn23 vdd 0 OR2
-Xor_n_all orn01 orn23 senseN vdd 0 OR2
+Xor_n45 tN4 tN5 orn45 vdd 0 OR2
+Xor_n67 tN6 tN7 orn67 vdd 0 OR2
+Xor_n_0123 orn01 orn23 orn0123 vdd 0 OR2
+Xor_n_4567 orn45 orn67 orn4567 vdd 0 OR2
+Xor_n_all orn0123 orn4567 senseN vdd 0 OR2
 .ends
 
 .subckt DRIVER_SHARED inp out vdd 0
@@ -258,10 +209,26 @@ Xenc3 b0 b1 b2 tP3 tN3 vdd 0 ENC3
 Ctp3 tP3 0 {CLOAD}
 Ctn3 tN3 0 {CLOAD}
 
+Xenc4 b0 b1 b2 tP4 tN4 vdd 0 ENC3
+Ctp4 tP4 0 {CLOAD}
+Ctn4 tN4 0 {CLOAD}
+
+Xenc5 b0 b1 b2 tP5 tN5 vdd 0 ENC3
+Ctp5 tP5 0 {CLOAD}
+Ctn5 tN5 0 {CLOAD}
+
+Xenc6 b0 b1 b2 tP6 tN6 vdd 0 ENC3
+Ctp6 tP6 0 {CLOAD}
+Ctn6 tN6 0 {CLOAD}
+
+Xenc7 b0 b1 b2 tP7 tN7 vdd 0 ENC3
+Ctp7 tP7 0 {CLOAD}
+Ctn7 tN7 0 {CLOAD}
+
 ********************************
 * Shared sense + driver node (aggregated over slices)
 ********************************
-Xsense_shared tP0 tP1 tP2 tP3 tN0 tN1 tN2 tN3 sharedSenseP sharedSenseN vdd 0 SENSE_SHARED
+Xsense_shared tP0 tP1 tP2 tP3 tP4 tP5 tP6 tP7 tN0 tN1 tN2 tN3 tN4 tN5 tN6 tN7 sharedSenseP sharedSenseN vdd 0 SENSE_SHARED
 
 Bdiff sharedSenseDiff 0 V=V(sharedSenseP)-V(sharedSenseN)
 BnoiseP sharedSenseP_noise 0 V={V(sharedSenseP)+noise_amp*sin(2*pi*noise_freq*time)}
@@ -275,19 +242,14 @@ RboostP sharedDriveP boostP_node {BOOST_R}
 RboostN sharedDriveN boostN_node {BOOST_R}
 XboostP boostP_node sharedDriveN vdd vdd sky130_fd_pr__pfet_01v8 model=sky130_fd_pr__pfet_01v8__ss l={BOOST_L} w={BOOST_WP} nf=1 ad={BOOST_WP*BOOST_L} as={BOOST_WP*BOOST_L} pd={2*(BOOST_WP+BOOST_L)} ps={2*(BOOST_WP+BOOST_L)} nrd=1 nrs=1 sa=0 sb=0 sd=0
 XboostN boostN_node sharedDriveP 0 0 sky130_fd_pr__nfet_01v8 model=sky130_fd_pr__nfet_01v8__ss l={BOOST_L} w={BOOST_WN} nf=1 ad={BOOST_WN*BOOST_L} as={BOOST_WN*BOOST_L} pd={2*(BOOST_WN+BOOST_L)} ps={2*(BOOST_WN+BOOST_L)} nrd=1 nrs=1 sa=0 sb=0 sd=0
-BdriveDiff sharedDriveDiff 0 V={V(sharedDriveP)-V(sharedDriveN)+(time<{sense_latency_prebias_dur}?{sense_latency_prebias}:0)+{COMP_FORCE_DELTA}}
-Bcomp_out comp_out 0 V={COMP_TOPOLOGY ? V(comp_dt_out) : V(comp_sa_out)}
-Vcomp_clk CLK 0 PULSE(0 {VDD} {COMP_CLK_DELAY} {COMP_CLK_TR} {COMP_CLK_TF} {COMP_CLK_HIGH} {COMP_CLK_PERIOD})
-Xcomp_sa sharedDriveP sharedDriveN comp_sa_out vdd 0 STRONGARM_INVERT COMP_WP={COMP_WP} COMP_WN={COMP_WN} COMP_L={COMP_L} COMP_WP_CROSS={COMP_WP_CROSS} COMP_WN_TAIL={COMP_WN_TAIL} COMP_WN_LOAD={COMP_WN_LOAD} PFET_MODEL=sky130_fd_pr__pfet_01v8__ss NFET_MODEL=sky130_fd_pr__nfet_01v8__ss
-Xcomp_dt sharedDriveP sharedDriveN CLK comp_dt_out vdd 0 DOUBLE_TAIL_COMP W_in={COMP_DT_IN} W_tail_pre={COMP_DT_TAIL_PRE} W_tail_latch={COMP_DT_TAIL_LATCH} W_latch={COMP_DT_LATCH} W_pmos={COMP_DT_PMOS} W_inv_wn={COMP_DT_INV_WN} W_inv_wp={COMP_DT_INV_WP} NFET_MODEL=sky130_fd_pr__nfet_01v8__ss PFET_MODEL=sky130_fd_pr__pfet_01v8__ss MULT=1
 
 ********************************
 ********************************
-* Stimulus (pseudo-random per-slice toggles)
+* Stimulus (dual-bit medium-activity pattern)
 ********************************
-Vb0 b0 0 PWL(0 0 0.5n 1 1.4n 0 2.9n 1 7n 1 7.1n 0 14n 0 35n 0)
-Vb1 b1 0 PWL(0 0 0.8n 1 1.9n 0 3.6n 1 7.2n 1 7.3n 0 13n 0 35n 0)
-Vb2 b2 0 PWL(0 0 1.9n 1 2.6n 0 4.3n 1 8n 1 8.1n 0 15n 0 35n 0)
+Vb0 b0 0 PULSE(0 {VDD} {B0_START} 50p 50p 10n 20n)
+Vb1 b1 0 PULSE(0 {VDD} {B1_START} 50p 50p 11n 22n)
+Vb2 b2 0 0
 
 ********************************
 * Measurements
@@ -310,26 +272,15 @@ Vb2 b2 0 PWL(0 0 1.9n 1 2.6n 0 4.3n 1 8n 1 8.1n 0 15n 0 35n 0)
 .meas tran Eslice    PARAM='Edyn/NSLICES_IN_DECK'
 .meas tran Eword_est PARAM='Eslice*NSLICES'
 
-.meas tran td_tP0 TRIG V(b0) VAL={0.5*VDD} RISE=1 TARG V(tP0) VAL={0.5*VDD} RISE=1
-.meas tran td_tN0 TRIG V(b0) VAL={0.5*VDD} RISE=1 TARG V(tN0) VAL={0.5*VDD} RISE=1
+.meas tran td_tP0 TRIG V(b0) VAL={sense_thresh_low*VDD} RISE=1 TARG V(tP0) VAL={sense_thresh_high*VDD} RISE=1
+.meas tran td_tN0 TRIG V(b0) VAL={sense_thresh_low*VDD} RISE=1 TARG V(tN0) VAL={sense_thresh_high*VDD} RISE=1
 .meas tran settle_tP0 TRIG V(tP0) VAL={0.1*VDD} RISE=1 TARG V(tP0) VAL={0.9*VDD} RISE=1
 .meas tran settle_tN0 TRIG V(tN0) VAL={0.9*VDD} FALL=1 TARG V(tN0) VAL={0.1*VDD} FALL=1
-.meas tran td_sharedP TRIG V(b0) VAL={0.5*VDD} RISE=1 TARG V(sharedDriveP) VAL={0.5*VDD} RISE=1
+.meas tran td_sharedP TRIG V(b0) VAL={sense_thresh_low*VDD} RISE=1 TARG V(sharedDriveP) VAL={sense_thresh_high*VDD} RISE=1
 .meas tran settle_sharedP TRIG V(sharedDriveP) VAL={0.1*VDD} RISE=1 TARG V(sharedDriveP) VAL={0.9*VDD} RISE=1
-.meas tran sense_headroom_min MIN V(sharedDriveDiff)
-.meas tran sense_headroom_max MAX V(sharedDriveDiff)
-.meas tran sense_diff_min MIN V(sharedSenseDiff)
-.meas tran sense_diff_max MAX V(sharedSenseDiff)
-.param comp_pass_low={0.05*VDD}
-.param comp_pass_high={0.25*VDD}
-.param comp_pass_pct=0.1
-.meas tran sense_thresh_latency TRIG V(sharedDriveDiff) VAL={sense_latency_low} RISE=1 TARG V(sharedDriveDiff) VAL={sense_latency_high} RISE=1
-.meas tran comp_toggle_latency TRIG V(comp_out) VAL={comp_pass_low} RISE=1 TARG V(comp_out) VAL={comp_pass_high} RISE=1
-.meas tran comp_out_max MAX V(comp_out)
-.meas tran comp_out_min MIN V(comp_out)
-.meas tran sharedSenseP_max MAX V(sharedSenseP)
-.meas tran sharedSenseN_min MIN V(sharedSenseN)
-
+.meas tran sense_headroom_min MIN V(sharedSenseDiff)
+.meas tran sense_headroom_max MAX V(sharedSenseDiff)
+.meas tran sense_thresh_latency TRIG V(sharedSenseDiff) VAL={sense_thresh_low*VDD} RISE=1 TARG V(sharedSenseDiff) VAL={sense_thresh_high*VDD} RISE=1
 
 ********************************
 * Analysis control

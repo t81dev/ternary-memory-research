@@ -1,72 +1,44 @@
 # ternary-memory-research
 
-**Mission.**  
-This repository investigates whether ternary-native memory cells or ternary-oriented memory interfaces can provide measurable density or energy advantages over conventional binary SRAM paired with packed ternary representations.
+This project systematically evaluates whether ternary-native memory (cells plus periphery) can survive realistic guardrails (noise, energy, latency) and, if so, which decks survive the kill criteria. The repo is research-first: the code exists only to expose enough instrumentation so that every “better” ternary candidate carries a verifiable energy/headroom story before `spicemodels/` ever claims a result.
 
-The goal is not to promote ternary hardware, but to determine—under explicit constraints—whether any form of native ternary memory survives realistic periphery, noise, and energy accounting.
+## TL;DR
+- **Current status:** shared-sense + encoder runs now span ±10%/TT, driver/noise sweeps, OR-slice scaling (4→8/16), and ±0.5 ns phase-skew, all logged with `sense_headroom` histograms plus `sense_thresh_latency`. So far every seed still reports `comp_pass=failed` around 860–865 mV headroom, with jitter ≈0.125 ps (±10%) / 4.75 ps (TT).  
+- **Next action:** keep filling the noise/driver/phase-skew matrices (see `TODO.md`), regenerate the CSV/histogram pairs, and refresh `STATUS.md`/`models/periphery-cost-model.md` so the guard/jitter ledger stays auditable before the decks migrate into `spicemodels/`.
+- **How to help:** run the scripts in `tools/` (start with `tools/run_noise_mismatch_driver_sweep.sh` and `tools/run_shared_sense_phase_skew.sh`), re-run `tools/aggregate_*` + `tools/headroom_histogram.py` to refresh the CSVs, and then update the relevant docs (`experiments/shared-sense-periphery.md`, `models/periphery-cost-model.md`, `STATUS.md`, `SUMMARY.md`).
 
-## Non-goals
+## Status table (guard/jitter ledger)
 
-- Not an accelerator implementation.
-- Not a dependency of TFMBS or any ternary execution framework.
-- Not a production-ready memory macro.
-- Not advocacy for ternary hardware.
+| Experiment | Logs | Headroom bin | Latency | Notes |
+| --- | --- | --- | --- | --- |
+| ±10% mismatch MC (0.9/1.0/1.1 V) | `logs/mismatch-mc/*` + `headroom_histogram.csv` | 860–865 mV | ≈0.125 ps | 150 seeds documented; hist/jitter + `sense_thresh_latency` recorded. |
+| TT mismatch MC (1.0 V) | `logs/mismatch-mc-tt/*` | 960–965 mV | ≈4.75 ps | TT guard/jitter logged + headroom histogram. |
+| Noise sweeps (5 mV/10 mV) | `logs/noise-mismatch-{5m,10m}` | 860–865 mV | ≈0.124 ps | Keep regenerating `mismatch_mc.csv` + hist after each seed batch. |
+| Driver scales 1.5/2.0/2.5 | `logs/noise-mismatch-{5m,10m}-driver-{1p5,2,2p5}` | 860–865 mV | ≈0.125 ps | Each directory mirrors the tuples + hist counts (chunked seeds). |
+| OR-slice glimpses (8/16 slices) | `logs/shared-sense-glimpse-{8,16}` | −297…−233 mV (converted) | ≈1–5 ps | Energy stays near 2.4–2.8 pJ/word even as slices double; keep hist synchronized. |
+| Phase-skew stress (±0.5 ns) | `logs/shared-sense-phase-skew` | ≈−271 mV | ≈1.95 ps | New tuples from `tools/run_shared_sense_phase_skew.sh` + histogram. |
 
-## Motivation
+## What to run next
+1. **Noise/driver sweep:** `tools/run_noise_mismatch_driver_sweep.sh` (set `SAMPLES=` to shorten seeds if needed). Every time you run it, rerun `tools/parse_mismatch_log.py`, `tools/aggregate_mismatch_logs.py`, and `tools/headroom_histogram.py` so the CSV + histogram stay current. Update `experiments/shared-sense-periphery.md` / `STATUS.md` with the new tuple counts (headroom bin, latency, `comp_pass`).
+2. **Phase-skew coverage:** rerun `tools/run_shared_sense_phase_skew.sh`, aggregate with `tools/aggregate_phase_skew_logs.py`, and regenerate `headroom_histogram.csv`. Document the new tuples in `STATUS.md` + `models/periphery-cost-model.md`.
+3. **Deck migration prep:** once the noise/driver/phase matrices look stable, bundle the tuples into `models/periphery-cost-model.md`, confirm the guard/jitter ledger matches `STATUS.md`, and then move the validated deck into `spicemodels/` for final validation.
 
-Ternary execution systems already exist in software and emulation. The open question addressed here is whether **memory itself** can become ternary-native in a way that survives periphery costs, noise margins, and full-system energy accounting.
+## Useful links
+- `STATUS.md`, `SUMMARY.md`: living guard/jitter story + blockers.  
+- `TODO.md`: remaining experiments / migration checklist.  
+- `models/periphery-cost-model.md`: periphery cost ledger + references to the logs described above.  
+- `experiments/shared-sense-periphery.md`: experiment log with headroom tuples + notes on stress sweeps.  
+- `tools/`: scripts for running sweeps and regenerating CSVs/histograms.
 
-This repository assumes that semantic consumers of ternary values may exist elsewhere, but it does **not** assume their presence. Any successful result must stand on its own and remain importable into binary, ternary, or hybrid systems without architectural coupling.
+New contributors can start by running one of the scripts above, confirming the logs update, and then refreshing the heading in `STATUS.md` / `models/periphery-cost-model.md` before opening a pull request. Use the CSV/histogram pairs as the ground truth for every guard/jitter reference.
+## Visual reference
 
-The value of this work comes from transparent, falsifiable modeling rather than optimistic claims.
+![Headroom histogram for the 8-slice glimpse deck](docs/figures/headroom-8slice-headroom.png)
 
-## Core research questions
+This histogram comes from `logs/shared-sense-glimpse-8slice/headroom_histogram.csv`. To regenerate it after rerunning the glimpse deck, run:
 
-1. Can a ternary memory element reduce **energy per delivered trit** relative to binary SRAM plus PT-5 encoding?
-2. Does ternary storage reduce **effective memory traffic or density cost** once interfaces and periphery are fully accounted for?
-3. Where do apparent density or energy gains collapse when sense amplifiers, decoding, and timing infrastructure are included?
-
-## Screening thresholds (non-binding)
-
-These example thresholds are used to rapidly filter candidates, not to guarantee acceptance:
-
-- ≥1.3× effective density improvement **after** periphery amortization.
-- ≥1.5× lower pJ/trit read energy compared to the binary SRAM baseline.
-- Worst-case access latency no worse than the binary SRAM reference.
-
-Failure to meet these thresholds does not imply ternary memory is impossible, only that the candidate under evaluation does not justify further work.
-
-## Failure conditions
-
-The following conditions falsify a candidate and are formalized in `docs/kill-criteria.md`:
-
-- The ternary middle state is unstable across PVT corners.
-- Sense energy or periphery complexity overwhelms any cell-level savings.
-- Area or interface overhead cancels density or energy advantages.
-
-Candidates that trigger these conditions are intentionally terminated early.
-
-## Periphery validation snapshot
-
-The shared sense + encoder path is the make-or-break periphery block for Option B. Our workload log in `spicemodels/option-b-encoder-results.md` now reports leakage‑corrected `Edyn` scaled per slice/word plus the fitted activity model `Eword ≈ Eleak + 0.33 pJ × transitions`, which feeds into the amortized periphery ledger at `models/periphery-cost-model.md`.
-
-The aggregated sense/driver run (`spicemodels/option-b-encoder-with-shared-sense*.spice`) now covers TT and ±10% VDD, and `periphery-cost-model.md` tracks the same energy/headroom tuples (≈0.45 pJ `Edyn`, 4–6 pJ `Eword_est`, headroom ≈43–111 mV). Because the shared driver never reaches 0.5 VDD, the `.meas` thresholds were shifted to `{sense_thresh_low*VDD}`→`{sense_thresh_high*VDD}` to capture retiming/jitter margins before the waveform collapses; the new `sense_headroom_min/max` logs document the resulting low-swing safety window. The Monte Carlo noise sweeps now push every sample into the 895–900 mV range (`logs/mismatch-mc/headroom_histogram.csv`, `logs/mismatch-mc-tt/headroom_histogram.csv`, `logs/mismatch-mc-upsized/mismatch_mc.csv`), and the dedicated noise stress runs (5 mV/10 mV) keep the headroom bins at 860–865 mV while jitter stays ≈0.124 ps per seed (`logs/noise-mismatch-5m/mismatch_mc.csv`, `logs/noise-mismatch-10m/mismatch_mc.csv`), so the guard is auditable while the latency story catches up.
-The driver-sweep automation (`tools/run_noise_mismatch_driver_sweep.sh`) reruns those exact noise corruptions while scaling the shared driver (×1.5, ×2.0, ×2.5) and records every energy/headroom/jitter tuple in `logs/noise-mismatch-{5m,10m}-driver-{1p5,2,2p5}` so the ledger keeps the noise + driver trade-offs bound before any deck migration. Pass `SAMPLES=<n>` in the environment to limit the number of seeds per corner (default 50) when time is constrained.
-
-These measurements keep the repository’s `periphery dominance (2)` kill-criterion audit trail honest while tying the amortized encoder + shared-sense energy back into the README/ROADMAP narrative (see `models/periphery-cost-model.md` and `experiments/shared-sense-periphery.md` for the full table).
-
-## Remaining validation hookup
-After wiring the BSIM/TT parameter list into every shared-sense NFET/PFET (via the 13-parameter block or `process_switch=1`), queue 50–200 Monte Carlo runs at nominal and ±10% VDD, including a small injected noise source (≈5–10 mV) across `sharedsensep/sharedsensen`. Record the resulting `sense_headroom_min/max` histograms, confirm the worst-case headroom stays ≥20 mV even with noise, and copy the energy/headroom tuples (including driver permutations such as `logs/mismatch-mc-upsized/mismatch_mc.csv`) into `models/periphery-cost-model.md` and `STATUS.md` so the kill-criterion ledger stays auditable. Capture `sense_thresh_latency` once the guard nears the 0.86–0.90 V window (≈20–40 mV) so the jitter envelope (≈0.125 ps for ±10% runs and ≈4.75 ps at TT) lives alongside the headroom plots, keeping README, ROADMAP, and the ledger on the same timing story.
-
--Refer to `TODO.md` for the remaining stress sweeps (MC + jitter) and the migration checklist before the deck graduates into `spicemodels/`.
-
-The ±10% mismatch Monte Carlo campaign now runs 50 seeds per corner (0.9 V/1.0 V/1.1 V) plus a matched TT sweep, so `logs/mismatch-mc/mismatch_mc.csv` and `logs/mismatch-mc-tt/mismatch_mc_tt.csv` hold the full set of 150 entries and `logs/mismatch-mc/headroom_histogram.csv` / `logs/mismatch-mc-tt/headroom_histogram.csv` document the 860–865 mV / 960–965 mV guard bins for `sense_headroom_min`. The new `sense_thresh_latency` column now logs ≈0.125 ps across the ±10% samples and ≈4.75 ps at TT after retargeting the measurement to `sharedDriveDiff`, so the logs pair jitter, energy, and headroom for every seed before the decks migrate back into `spicemodels/`.
-
-## Encoder periphery tie-in
-The “typical workload” (≈3–5 transitions per 128-bit word) now ties directly into the amortized energy model from `spicemodels/option-b-encoder-results.md`: `Eword ≈ Eleak + 0.33 pJ × transitions`. Combining that with the shared-sense guardrail (≈4–6 pJ at typical activity) keeps the total periphery budget near 5–7 pJ/word, which we continue to highlight in `models/periphery-cost-model.md` and `STATUS.md` until the unified encoder+sense deck migrates into `spicemodels/` for the final validation chain.
-
-If the ~70–110 mV window already satisfies downstream detection (e.g., a low-power comparator or inverter sense latch), call it out as a low-swing feature in README/ROADMAP. Otherwise, incrementally upsize the final driver, log that energy vs. swing trade-off in `models/periphery-cost-model.md`, and link the new data back to this validation plan before migrating the deck into `spicemodels/`.
-
-## Repository structure
-
-This repository follows a question-first organization. Directories are intentionally empty until justified by surviving models or measurements.
+```
+python3 tools/plot_headroom_histogram.py \
+  logs/shared-sense-glimpse-8slice/headroom_histogram.csv \
+  docs/figures/headroom-8slice-headroom.png
+```

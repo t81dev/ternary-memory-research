@@ -18,6 +18,8 @@
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | ±10% mismatch MC (0.9/1.0/1.1 V) | 150 total (50/corner) | ~0.125 | 860–865 | ~0.900 | ≈0.313 | ≈3.34 | ≥20 mV above the 0.898–0.900 V guard window |
 | TT mismatch MC (1.0 V) | 50 | ~4.75 | 960–965 | ~1.002 | ≈−0.027 | ≈−0.29 | ≥60 mV margin from the same guard |
+- **OR-slice glimpses:** `logs/shared-sense-glimpse-{8,16}` now logs 0.9/1.0/1.1 V + extra seeds so each directory exports `mismatch_mc.csv`/`headroom_histogram.csv` with the `sense_thresh_latency` tuples (≈4.6 ps at 0.9 V dropping to ≈1.1 ps at 1.1 V) and headroom bins still clustering between −297 mV and −233 mV while the per-word energy (`Eword_est ≈ 2.4–2.8 pJ`) stays within the ≈5–7 pJ ledger even as the OR tree doubles in size.
+- **Phase-skew stress:** `logs/shared-sense-phase-skew` now houses the ±0.5 ns skew runs plus its histogram, so the guard/jitter ledger can reference `sense_thresh_latency ≈ 1.95 ps` and `sense_headroom_min ≈ −271 mV` whenever skewed timing dominates before we move the deck back into `spicemodels/`.
 
 ## Work in progress
 1. **Controller APIs:** Confirm the ternary tokens remain substrate-neutral and the shared-sense driver keeps its jitter/latency headroom under the stressed patterns before moving the deck into `spicemodels/`, and tie every histogram/timing tuple to the same timeline so the energy story always pairs with the guard data.

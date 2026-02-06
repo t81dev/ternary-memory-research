@@ -24,7 +24,11 @@ for path in sorted(logdir.glob("mc_*V_*.log")):
     if proc.returncode:
         print(f"Failed to parse {path.name}: {proc.stderr.strip()}", file=sys.stderr)
         sys.exit(proc.returncode)
-    edyn, eword, sense_min, sense_max, sense_thresh = proc.stdout.strip().split()
+    tokens = proc.stdout.strip().split()
+    if len(tokens) < 5:
+        print(f"Unexpected parser output for {path.name}: {proc.stdout.strip()}", file=sys.stderr)
+        sys.exit(1)
+    edyn, eword, sense_min, sense_max, sense_thresh = tokens[:5]
     rows.append((float(vdd), seed, edyn, eword, sense_min, sense_max, sense_thresh))
 
 rows.sort()
