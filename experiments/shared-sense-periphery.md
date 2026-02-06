@@ -13,7 +13,7 @@ The latest round of noise/driver sweeps (5 mV/10 mV × scale 1.5/2.0/2.5) pl
 
 ### 8–16 slice OR aggregation glimpses
 
-To verify that the shared comparator/driver remains bounded as more encoder slices feed the OR tree, we now capture deterministic glimpses with eight and sixteen slices. Copy the `Xenc*`/`Ctp*`/`Ctn*` blocks in `spicemodels/option-b-encoder-with-shared-sense*.spice` so `NSLICES_IN_DECK` equals 8 or 16, then run the same pseudo-random stimulus (or the MC deck with `mismatch_switch=0`) while keeping `sense_thresh_latency`, `sense_headroom_min/max`, and `sharedSenseDiff` probes unchanged. Log each run in `logs/shared-sense-glimpse-8slice` / `logs/shared-sense-glimpse-16slice`, regenerate the matching `headroom_histogram.csv` using `tools/headroom_histogram.py`, and make sure `models/periphery-cost-model.md` points to those CSVs so the energy/headroom scaling story stays parallel to the four-slice baseline.
+To verify that the shared comparator/driver remains bounded as more encoder slices feed the OR tree, we now capture deterministic glimpses with eight and sixteen slices. Copy the `Xenc*`/`Ctp*`/`Ctn*` blocks in [`spicemodels/option-b-encoder-with-shared-sense-mismatch.spice`](spicemodels/option-b-encoder-with-shared-sense-mismatch.spice) so `NSLICES_IN_DECK` equals 8 or 16, then run the same pseudo-random stimulus (or the MC deck with `mismatch_switch=0`) while keeping `sense_thresh_latency`, `sense_headroom_min/max`, and `sharedSenseDiff` probes unchanged. Log each run in `logs/shared-sense-glimpse-8slice` / `logs/shared-sense-glimpse-16slice`, regenerate the matching `headroom_histogram.csv` using `tools/headroom_histogram.py`, and make sure [`models/periphery-cost-model.md`](models/periphery-cost-model.md) points to those CSVs so the energy/headroom scaling story stays parallel to the four-slice baseline.
 
 These glimpses confirm that `Eslice` (measured via `.meas tran Eslice PARAM='Edyn/NSLICES_IN_DECK'`) still averages to ≈0.11–0.13 pJ and that the guard bin stays in the 860–865 mV neighborhood, validating the “periphery dominance (2)” ledger before any deck migration or controller retiming adjustments.
 
@@ -25,7 +25,7 @@ Every new driver-scale or noise-amplitude permutation must be captured in this l
 
 - Record `sense_thresh_latency` and `sense_headroom_min/max` in the CSV so the histogram generator can stay in sync.
 - Keep the `headroom_histogram.csv` counts matched to the number of seeds logged (use `tools/headroom_histogram.py` after each chunked run).
-- Reference the histogram/latency tuple from `models/periphery-cost-model.md` (the guard/jitter table near “Shared sense integration”) so the energy story and timing story stay paired.
+- Reference the histogram/latency tuple from [`models/periphery-cost-model.md`](models/periphery-cost-model.md) (the guard/jitter table near “Shared sense integration”) so the energy story and timing story stay paired.
 
 If you introduce a new driver/noise combo (e.g., adding `DRIVER_SCALE=3.5` or extra `noise_amp`), append a short summary row to this document describing the observed `Edyn`, `Eword_est`, and headroom bin so the experiments log stays the canonical ledger for future comparisons.
 
@@ -36,11 +36,11 @@ Use `tools/run_shared_sense_phase_skew.sh` to sweep `PHASE_SKEW_NS=±0.5n` (thre
 ### Pending / blocked actions
 
 * **TT corner deck:** `option-b-encoder-with-shared-sense-tt.spice` currently aborts because the TT corner includes a subcircuit with 13 formal parameters; our instantiation passes none. We need to ① either replicate those parameters when instantiating the corner (painful) or ② include the TT models with `process_switch=1` in the SS deck and rely on the same measurement plumbing (practical).  
-* **Mismatch / MC campaign:** still needs to run once the BSIM issue that broke the TT deck is resolved. This sweep will pair `mismatch_switch=1` with ±10% VDD to push the headroom measurement; log the resulting energy/latency in `periphery-cost-model.md` to keep kill criteria auditable.
+* **Mismatch / MC campaign:** still needs to run once the BSIM issue that broke the TT deck is resolved. This sweep will pair `mismatch_switch=1` with ±10% VDD to push the headroom measurement; log the resulting energy/latency in [`models/periphery-cost-model.md`](models/periphery-cost-model.md) to keep kill criteria auditable.
 
 ### Measurement notes
 
-* All shared decks reuse the dual-bit (4 transition/window) pattern from `option-b-encoder-results.md` so transition counts stay aligned with the per-transition modeling table.
+* All shared decks reuse the dual-bit (4 transition/window) pattern from [`option-b-encoder-results.md`](option-b-encoder-results.md) so transition counts stay aligned with the per-transition modeling table.
 * The headroom monitor now uses a B-source (`Bshared_diff`) to compute `V(sharedsensep,sharedsensen)` so the min/max are recorded even though the comparator itself never hits the trigger thresholds.  
 * Delay/settling probes (`td_tN0`, `settle_sharedP`, etc.) currently fail under every run because the shared driver seldom crosses 0.5·VDD; if desired, we can add separate `.meas` statements that target lower thresholds (e.g., 0.1/0.9 VDD) to recover numeric latency values once the headroom is larger.
 * The `{sense_thresh_low/high}` span now captures “time to 90%” settling around the achievable ~30–50 mV swing; log `sense_thresh_latency` alongside the `sense_headroom_{min,max}` histograms in `logs/mismatch-mc*.csv` so every experiment has both energy and jitter recorded.
