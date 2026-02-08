@@ -1,3 +1,4 @@
 # Keep aggregated CSVs under version control but ignore oversized log dumps.
 logs/archive/
 logs/noise-mismatch-5m-driver-1p5-delta-0m/*.log
+.DS_Store
