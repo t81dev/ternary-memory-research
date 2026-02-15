@@ -1,3 +1,5 @@
+# Status
+
 ## Current health
 - **Encoder deck:** deterministic runs cover sync/de-sync/sparse/dense/random patterns; leakage-corrected `Edyn` and per-transition normalization reported in [`spicemodels/option-b-encoder-results.md`](spicemodels/option-b-encoder-results.md).
 - **Shared periphery:** shared comparator/driver energy and headroom logged at ±10% VDD (0.9 V and 1.1 V) plus the random stimulus (see [`experiments/shared-sense-periphery.md`](experiments/shared-sense-periphery.md)). Headroom monitors (`sharedSenseDiff`) now register 0.8995–0.9005 V at ±10% and ≈0.998 V at TT, so the 20 mV guard is satisfied even though the comparator still never crosses 0.5·VDD (the `td_*`/`settle_*` probes remain “out of interval”). The sense_thresh_latency column now records ≈0.125 ps for every ±10% seed and ≈4.75 ps for the TT sweep, so `logs/mismatch-mc/mismatch_mc.csv` / `logs/mismatch-mc-tt/mismatch_mc_tt.csv` bundle jitter, energy, and headroom before the decks migrate back into `spicemodels/`. The TT deck runs cleanly with the new parameter block, giving us energy, headroom, and noise-margin data that tie into `logs/mismatch-mc/headroom_histogram.csv` and `logs/mismatch-mc-tt/headroom_histogram.csv`.
@@ -15,17 +17,21 @@
 - **Mismatch MC headroom:** Running 50 seeds per corner at 0.9/1.0/1.1 V (and the matched TT sweep) with those thresholds now fills `logs/mismatch-mc/headroom_histogram.csv` (895–900 mV) and `logs/mismatch-mc-tt/headroom_histogram.csv` (995–1000 mV), so the ledger can keep documenting the low-swing guard while we work on latency tracking.
 - **Guard/jitter ledger:** The new `ttime("v(sharedDriveDiff)",...)` guard timing now populates `sense_thresh_latency` for every ±10%/TT seed, and those tuples plus the matching histograms are already mirrored in [`models/periphery-cost-model.md`](models/periphery-cost-model.md), [`SUMMARY.md`](SUMMARY.md), and this file. Keep regenerating the histogram CSVs together with the latency column so the guard story stays auditable before we graduate the deck.
 
-| Corner | Seeds | sense_thresh_latency (ps) | Headroom bin (mV) | Headroom max (V) | Edyn (pJ) | Eword_est (pJ) | Guard margin |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| ±10% mismatch MC (0.9/1.0/1.1 V) | 150 total (50/corner) | ~0.125 | 860–865 | ~0.900 | ≈0.313 | ≈3.34 | ≥20 mV above the 0.898–0.900 V guard window |
-| TT mismatch MC (1.0 V) | 50 | ~4.75 | 960–965 | ~1.002 | ≈−0.027 | ≈−0.29 | ≥60 mV margin from the same guard |
-- **OR-slice glimpses:** `logs/shared-sense-glimpse-{8,16}` now logs 0.9/1.0/1.1 V + extra seeds so each directory exports `mismatch_mc.csv`/`headroom_histogram.csv` with the `sense_thresh_latency` tuples (≈4.6 ps at 0.9 V dropping to ≈1.1 ps at 1.1 V) and headroom bins still clustering between −297 mV and −233 mV while the per-word energy (`Eword_est ≈ 2.4–2.8 pJ`) stays within the ≈5–7 pJ ledger even as the OR tree doubles in size.
-- **Phase-skew stress:** `logs/shared-sense-phase-skew` now houses the ±0.5 ns skew runs plus its histogram, so the guard/jitter ledger can reference `sense_thresh_latency ≈ 1.95 ps` and `sense_headroom_min ≈ −271 mV` whenever skewed timing dominates before we move the deck back into `spicemodels/`.
+## Status table (guard/jitter ledger)
+
+| Experiment | Logs | Headroom bin | Latency | Notes |
+| --- | --- | --- | --- | --- |
+| ±10% mismatch MC (0.9/1.0/1.1 V) | `logs/mismatch-mc/*` + `headroom_histogram.csv` | 860–865 mV | ≈0.125 ps | 150 seeds documented; hist/jitter + `sense_thresh_latency` recorded. |
+| TT mismatch MC (1.0 V) | `logs/mismatch-mc-tt/*` | 960–965 mV | ≈4.75 ps | TT guard/jitter logged + headroom histogram. |
+| Noise sweeps (5 mV/10 mV) | `logs/noise-mismatch-{5m,10m}` | 860–865 mV | ≈0.124 ps | Keep regenerating `mismatch_mc.csv` + hist after each seed batch. |
+| Driver scales 1.5/2.0/2.5 | `logs/noise-mismatch-{5m,10m}-driver-{1p5,2,2p5}` | 860–865 mV | ≈0.125 ps | Each directory mirrors the tuples + hist counts (chunked seeds). |
+| OR-slice glimpses (8/16 slices) | `logs/shared-sense-glimpse-{8,16}` | −297…−233 mV (converted) | ≈1–5 ps | Energy stays near 2.4–2.8 pJ/word even as slices double; keep hist synchronized. |
+| Phase-skew stress (±0.5 ns) | `logs/shared-sense-phase-skew` | ≈−271 mV | ≈1.95 ps | New tuples from `tools/run_shared_sense_phase_skew.sh` + histogram. |
 
 ## Work in progress
 1. **Controller APIs:** Confirm the ternary tokens remain substrate-neutral and the shared-sense driver keeps its jitter/latency headroom under the stressed patterns before moving the deck into `spicemodels/`, and tie every histogram/timing tuple to the same timeline so the energy story always pairs with the guard data.
 
--## Blockers
+## Blockers
 After reviewing the ledger there are no new fixable issues yet—removing the oversized delta logs cleared the GitHub push pain, but the comparator path and timing probes below still need resolving.
 - Comparator handoff still fails: the 10 mV / driver-scale 2.5 sweep recorded `comp_pass == failed` for all 60 seeds even though the per-word `Eword_est ≈ 3.34 pJ` stayed well under 6.6 pJ, so the comparator path has not yet met the ≥49/50 stability requirement. Consider stronger drive or a different comparator before declaring the fork resolved.
 - The comparator/driver still never reaches 0.5·VDD, so the `td_*`/`settle_*` `.meas` entries remain “out of interval”; until we can correlate the high headroom with the newly logged latency span, those timing probes stay cautionary while we rely on the new jitter numbers.
